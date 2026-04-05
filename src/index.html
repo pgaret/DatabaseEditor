@@ -1314,117 +1314,6 @@
       </div>
     </div>
   </div>
-  <div class="modal custom-modal fade" id="newsModal" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-lg modal-dialog-centered" role="document">
-      <div class="modal-content custom-modal">
-        <div class="modal-header custom-header">
-          <h3 class="modal-title bold-font" id="newsModalTitle">Example news</h3>
-          <div class="news-article-date">
-            <i class="bi bi-calendar-event"></i>
-            <span class="dateSpan"></span>
-          </div>
-          <div class="news-options-global">
-            <div class="news-options">
-              <i class="bi bi-three-dots-vertical"></i>
-            </div>
-            <div class="news-options-menu auto-closable">
-              <div class="reload-article button-with-icon" id="regenerateArticle">
-                <i class="bi bi-arrow-clockwise"></i>
-                <span class="">Regenerate</span>
-              </div>
-              <div class="reload-article button-with-icon" id="regenerateWithContext">
-                <i class="bi bi-chat-text"></i>
-                <span class="">Regenerate with context</span>
-              </div>
-              <div class="news-options-context" id="newsOptionsContext" aria-hidden="true">
-                <textarea class="news-options-context-textarea" id="newsOptionsContextTextarea"
-                  placeholder="Add extra context for the model..."></textarea>
-                <div class="news-options-context-actions">
-                  <button type="button" class="close-modal" id="newsOptionsContextCancel">Cancel</button>
-                  <button type="button" class="confirm-modal" id="newsOptionsContextRegenerate">Regenerate</button>
-                </div>
-              </div>
-              <div class="copy-article button-with-icon" id="copyArticle">
-                <i class="bi bi-copy"></i>
-                <span class="">Copy</span>
-              </div>
-              <div class="edit-article button-with-icon" id="editArticle">
-                <i class="bi bi-pencil-square"></i>
-                <span class="">Edit</span>
-              </div>
-              <div class="edit-article button-with-icon close-modal" id="deleteArticle">
-                <i class="bi bi-trash"></i>
-                <span class="">Delete</span>
-              </div>
-            </div>
-          </div>
-          <img src="" alt="" class="news-image-background">
-        </div>
-        <div class="modal-body custom-body" id="newsModalBody">
-          <div class="news-article">
-
-          </div>
-        </div>
-        <div class="modal-footer custom-footer">
-          <div class="d-flex">
-            <button type="button" class="close-modal" data-bs-dismiss="modal" id="closeNewsArticle">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="modal custom-modal fade" id="customNewsModal" data-bs-keyboard="false">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content custom-modal">
-        <div class="modal-header custom-header">
-          <h4 class="modal-title bold-font" id="customNewsModalTitle">Create custom news</h4>
-        </div>
-        <div class="modal-body custom-body">
-            <div id="customNewsForm">
-              <div class="custom-news-row">
-                <div class="custom-news-stack" data-span="6">
-                  <span class="custom-news-label bold-font">Type</span>
-                  <div class="dropdown-global">
-                    <button type="button" class="redesigned-dropdown bold-font" id="customNewsTypeButton" aria-haspopup="true"
-                      aria-expanded="false" data-value="">
-                      <span class="dropdown-label">Select type</span>
-                      <i class="redesigned-chevron"></i>
-                    </button>
-                    <ul class="redesigned-dropdown-menu" id="customNewsTypeMenu" style="font-family: Formula1;">
-                    </ul>
-                  </div>
-                </div>
-                <div class="custom-news-stack" data-span="6">
-                  <span class="custom-news-label bold-font">Date</span>
-                  <input type="date" class="custom-news-input" id="customNewsDateInput">
-                </div>
-              </div>
-              <div class="custom-news-row">
-                <div class="custom-news-stack" data-span="12">
-                  <span class="custom-news-label bold-font">Title</span>
-                  <div class="dropdown-global" id="customNewsTemplateWrap">
-                    <button type="button" class="redesigned-dropdown bold-font" id="customNewsTemplateButton" aria-haspopup="true"
-                      aria-expanded="false" data-value="">
-                      <span class="dropdown-label">Automatic / default title</span>
-                      <i class="redesigned-chevron"></i>
-                    </button>
-                    <ul class="redesigned-dropdown-menu" id="customNewsTemplateMenu" style="font-family: Formula1;">
-                    </ul>
-                  </div>
-                  <input type="text" class="custom-news-input custom-news-hidden custom-news-title-input" id="customNewsTitleInput" placeholder="Write the article title">
-                </div>
-              </div>
-              <div class="custom-news-params custom-news-params-top" id="customNewsParams"></div>
-              <div class="custom-news-error custom-news-hidden" id="customNewsError"></div>
-            </div>
-        </div>
-        <div class="modal-footer custom-footer">
-          <button type="button" class="close-modal" data-bs-dismiss="modal" id="customNewsCancel">Cancel</button>
-          <button type="button" class="confirm-modal" id="customNewsCreateBtn">Create</button>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="modal custom-modal fade" id="confirmModal" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-sm modal-dialog-centered" role="document">
       <div class="modal-content custom-modal">
@@ -1438,24 +1327,6 @@
           <div class="d-flex">
             <button type="button" class="close-modal" data-bs-dismiss="modal">Close</button>
             <button type="button" class="confirm-modal" id="confirmActionButton">Confirm</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="modal custom-modal fade" id="newsContextModal" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-sm modal-dialog-centered" role="document">
-      <div class="modal-content custom-modal">
-        <div class="modal-header custom-header">
-          <h3 class="modal-title bold-font">Add context for this article</h3>
-        </div>
-        <div class="modal-body custom-body">
-          <textarea class="news-context-textarea" placeholder="Add extra context for the model..."></textarea>
-        </div>
-        <div class="modal-footer custom-footer">
-          <div class="d-flex">
-            <button type="button" class="close-modal context-cancel" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="confirm-modal context-confirm">Read</button>
           </div>
         </div>
       </div>
@@ -1669,13 +1540,6 @@
       <div class="py-2">
         <ul class="nav nav-pills">
           <li class="nav-item">
-            <a class="nav-link bold-font scriptPills" data-bs-toggle="pill" id="newspill">
-              <i class="bi bi bi-newspaper pill-icon"></i>
-              <label class="bold-font pill-label">NEWS</label>
-              <div class="pill-line"></div>
-            </a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link bold-font scriptPills" data-bs-toggle="pill" id="h2hpill">
               <i class="bi bi-bar-chart-fill pill-icon"></i>
               <label class="bold-font pill-label">COMPARISON</label>
@@ -1800,65 +1664,6 @@
               <div class="recents-list" id="recentsList"></div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="script-view hide unloaded" id="news">
-        <div class="general-top-panel">
-          <div class="title-buttons-left">
-            <div class="dropdown-global">
-              <button class="redesigned-dropdown bold-font" id="newsTypeButton" aria-haspopup="true"
-                aria-expanded="false">
-                <span class="dropdown-label">Filter</span>
-                <i class="redesigned-chevron"></i>
-              </button>
-              <ul class="redesigned-dropdown-menu" id="newsTypeMenu" style="font-family: Formula1;">
-                <a class="redesigned-dropdown-item " data-value="race_result">Race results <i
-                    class="bi bi-check"></i></a>
-                <a class="redesigned-dropdown-item" data-value="quali_result">Qualifying results <i
-                    class="bi bi-check"></i></a>
-                <a class="redesigned-dropdown-item" data-value="driver_transfers">Driver transfers <i
-                    class="bi bi-check"></i></a>
-                <a class="redesigned-dropdown-item" data-value="others">Other news <i class="bi bi-check"></i></a>
-                <a class="redesigned-dropdown-item" data-value="turning_points">Turning points <i
-                    class="bi bi-check"></i></a>
-              </ul>
-            </div>
-            <div class="dropdown-global">
-              <button class="redesigned-dropdown bold-font" id="newsSeasonButton" aria-haspopup="true"
-                aria-expanded="false">
-                <span class="dropdown-label">Season</span>
-                <i class="redesigned-chevron"></i>
-              </button>
-              <ul class="redesigned-dropdown-menu" id="newsSeasonMenu" style="font-family: Formula1;">
-              </ul>
-            </div>
-            <div class="dropdown-global">
-              <button class="redesigned-dropdown bold-font" id="newsLanguageButton" aria-haspopup="true"
-                aria-expanded="false">
-                <span class="dropdown-label">Language</span>
-                <i class="redesigned-chevron"></i>
-              </button>
-              <ul class="redesigned-dropdown-menu" id="newsLanguageMenu" style="font-family: Formula1;">
-              </ul>
-            </div>
-          </div>
-          <div class="title transfer-title bold-font">
-            Latest news
-          </div>
-          <div class="title-buttons-right">
-            <div class="button-with-icon" id="createCustomNews">
-              <i class="bi bi-plus-circle"></i>
-              <span class="">Create news</span>
-            </div>
-            <div class="button-with-icon" id="reloadNews">
-              <i class="bi bi-arrow-clockwise"></i>
-              <span class="">Regenerate news</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="news-grid">
-
         </div>
       </div>
       <div class="script-view hide unloaded" id="head2head_viewer">
@@ -5890,16 +5695,16 @@
       <div class="script-view hide unloaded" id="design_presets">
         <div class="general-top-panel">
           <div class="title-buttons-left">
-            <h5 class="bold-font" style="margin: 0; color: var(--text-color);">Design Focus Presets</h5>
+            <h5 class="bold-font" style="margin: 0; color: var(--text-general);">Design Focus Presets</h5>
           </div>
         </div>
         <div class="presets-content" id="presetsContent">
           <div class="presets-existing" id="presetsExisting"></div>
           <div class="presets-add-section" id="presetsAddSection">
-            <h6 class="bold-font" style="color: var(--text-color); margin-top: 1rem;">Add New Preset</h6>
+            <h6 class="bold-font" style="margin-top: 1rem;">Add New Preset</h6>
             <div class="presets-add-form" id="presetsAddForm">
               <div class="presets-name-row">
-                <label class="bold-font" style="color: var(--text-color);">Preset Name</label>
+                <label class="bold-font">Preset Name</label>
                 <input type="text" class="custom-input-number preset-name-input" id="presetNameInput" placeholder="e.g. MaxDownforce">
               </div>
               <div id="presetsSliders"></div>

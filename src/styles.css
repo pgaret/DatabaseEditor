@@ -20325,14 +20325,14 @@ p.news-error-api-key {
 }
 
 .preset-card {
-  background: var(--card-bg, #1a1a2e);
+  background: var(--elements);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
 
 .preset-card-title {
-  color: var(--text-color);
+  color: var(--text-general);
   margin-bottom: 0.5rem;
 }
 
@@ -20346,15 +20346,15 @@ p.news-error-api-key {
 .preset-table td {
   padding: 6px 10px;
   text-align: center;
-  color: var(--text-color);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-general);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-general) 10%, transparent);
 }
 
 .preset-table th {
   font-weight: 600;
   font-size: 0.75rem;
   text-transform: uppercase;
-  opacity: 0.7;
+  color: color-mix(in srgb, var(--text-general) 60%, transparent);
 }
 
 .preset-table th:first-child,
@@ -20375,16 +20375,19 @@ p.news-error-api-key {
 }
 
 .focus-mid {
-  color: var(--text-color);
-  opacity: 0.8;
+  color: var(--text-general);
 }
 
 .presets-add-section {
   margin-top: 1.5rem;
 }
 
+.presets-add-section h6 {
+  color: var(--text-general);
+}
+
 .presets-add-form {
-  background: var(--card-bg, #1a1a2e);
+  background: var(--elements);
   border-radius: 8px;
   padding: 1rem;
 }
@@ -20396,6 +20399,10 @@ p.news-error-api-key {
   margin-bottom: 1rem;
 }
 
+.presets-name-row label {
+  color: var(--text-general);
+}
+
 .preset-name-input {
   max-width: 250px;
 }
@@ -20403,11 +20410,11 @@ p.news-error-api-key {
 .preset-part-section {
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-general) 10%, transparent);
 }
 
 .preset-part-title {
-  color: var(--text-color);
+  color: var(--text-general);
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
 }
@@ -20425,19 +20432,18 @@ p.news-error-api-key {
 }
 
 .preset-slider-label {
-  color: var(--text-color);
+  color: color-mix(in srgb, var(--text-general) 80%, transparent);
   font-size: 0.8rem;
   min-width: 140px;
-  opacity: 0.8;
 }
 
 .preset-slider {
   flex: 1;
-  accent-color: var(--primary-color, #6366f1);
+  accent-color: var(--new-primary);
 }
 
 .preset-slider-value {
-  color: var(--text-color);
+  color: var(--text-general);
   font-size: 0.8rem;
   min-width: 28px;
   text-align: right;
@@ -20445,7 +20451,7 @@ p.news-error-api-key {
 
 .preset-add-btn {
   margin-top: 0.75rem;
-  background: var(--primary-color, #6366f1);
+  background: var(--new-primary);
   color: white;
   border: none;
   padding: 6px 20px;

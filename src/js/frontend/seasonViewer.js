@@ -2,7 +2,7 @@ import { races_names, names_full, team_dict, codes_dict, countries_data, combine
 import { resetH2H, queueAutoCompareDrivers } from './head2head';
 import { game_version, custom_team, manageSaveButton, new_update_notifications, seasonModData, updateFront } from "./renderer";
 import { insert_space, manageColor, setCurrentSeason, format_name } from "./transfers";
-import { news_insert_space } from "../backend/scriptUtils/newsUtils.js";
+import { insertSpace as news_insert_space } from "../backend/scriptUtils/dbUtils.js";
 import { Command } from "../backend/command.js";
 
 
