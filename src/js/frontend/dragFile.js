@@ -132,7 +132,6 @@ export async function processSaveFile(file) {
             // 6. Finalmente mostramos el editor
             editorPill.classList.remove("d-none");
             gamePill.classList.remove("d-none");
-            patreonPill.classList.remove("d-none");
 
             const command = new Command("saveSelected", {});
             command.execute();
