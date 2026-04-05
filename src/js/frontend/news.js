@@ -50,7 +50,7 @@ let originalTitleText = '';
 let cachedNewsAvailable = { normal: false, turning: false };
 
 function isPaidNewsMember() {
-  return window.__USER_DATA__?.paidMember || false;
+  return true;
 }
 
 function canUseGenAiForNews(news) {
@@ -567,10 +567,7 @@ async function generateAndRenderArticle(news, newsList, label = "Generating", fo
 function manageTurningPointButtons(news, newsList, maxDate, newsBody, readbuttonContainer, newsAvailable) {
   let approveButton, randomButton, cancelButton;
   const isAduoTurningPoint = news.type === "turning_point_aduo";
-  const isFreeTier = !window.__USER_DATA__?.paidMember
-  if (isFreeTier && news.hiddenByAvailability && !isAduoTurningPoint) {
-    return;
-  }
+  // All content unlocked
 
 
   if (news.turning_point_type === "original") {
@@ -886,17 +883,9 @@ function createNewsItemElement(news, index, newsAvailable, newsList, maxDate, is
   newsBody.appendChild(readbuttonContainer);
 
   if (!news.nonReadable || news.nonReadable === false) { //first check - if the news is readable
-    const canUserRead =
-      (!isTurning && window.__USER_DATA__?.paidMember === true) ||
-      (isTurning && (window.__USER_DATA__?.tierNumber >= 2 || isAduoTurningPoint));
-
-    if (canUserRead) {
-      if (canUseGenAiForNews(news)) {
-        readActions.appendChild(contextButton);
-      }
-      readActions.appendChild(readButton);
-      readbuttonContainer.appendChild(readActions);
-    }
+    readActions.appendChild(contextButton);
+    readActions.appendChild(readButton);
+    readbuttonContainer.appendChild(readActions);
 
   }
 
@@ -959,22 +948,8 @@ export async function place_news(newsAndTurningPoints, newsAvailable) {
     const isAduoTurningPoint = news.type === "turning_point_aduo";
 
     const h = hashStr(news.stableKey);
-    const isFreeTier = !window.__USER_DATA__?.paidMember && !newsAvailable.normal && !newsAvailable.turning;
-    if (isFreeTier) {
-      news.hiddenByAvailability = !isAduoTurningPoint;
-      news.hiddenReason = news.hiddenByAvailability ? (isTurning ? 'turning' : 'normal') : null;
-    } else {
-      if (!newsAvailable.turning && isTurning) {
-        news.hiddenByAvailability = (h % BUCKET_TURNING) !== 0;
-        news.hiddenReason = news.hiddenByAvailability ? 'turning' : null;
-      } else if (!newsAvailable.normal && !isTurning) {
-        news.hiddenByAvailability = (h % BUCKET_NORMAL) !== 0;
-        news.hiddenReason = news.hiddenByAvailability ? 'normal' : null;
-      } else {
-        news.hiddenByAvailability = false;
-        news.hiddenReason = null;
-      }
-    }
+    news.hiddenByAvailability = false;
+    news.hiddenReason = null;
 
 
     if (!maxDate || news.date > maxDate) maxDate = news.date;

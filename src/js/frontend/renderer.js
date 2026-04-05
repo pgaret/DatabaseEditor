@@ -186,11 +186,11 @@ let viewerLoaded = false;
 
 export let selectedTheme = "default-theme";
 let isNightlyHost = false;
-let hasPatreonThemeAccess = false;
+let hasPatreonThemeAccess = true;
 
 let newsAvailable = {
-    "normal": false,
-    "turning": false,
+    "normal": true,
+    "turning": true,
 }
 
 let versionNow;
@@ -251,78 +251,9 @@ export function setIsShowingNotification(value) {
 /**
  * get the patch notes from the actual version fro the github api
  */
-async function getPatchNotes() {
-    try {
-        if (versionNow.slice(-3) !== "dev" && !versionNow.includes("nightly")) {
-            let response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/releases/tags/${versionNow}`);
-            let data = await response.json();
-            let changes = data.body;
-            let changesHTML = DOMPurify.sanitize(marked(changes));
-            patchNotesBody.innerHTML = changesHTML
-            let h1Elements = patchNotesBody.querySelectorAll("h1");
+// Patch notes removed
 
-            h1Elements.forEach(function (h1Element) {
-                let h4Element = document.createElement("h4");
-                h4Element.textContent = h1Element.textContent;
-                h4Element.classList.add("bold-font")
-                patchNotesBody.replaceChild(h4Element, h1Element);
-            });
-
-            let h2Elements = patchNotesBody.querySelectorAll("h2");
-            h2Elements.forEach(function (h1Element) {
-                let h4Element = document.createElement("h4");
-                h4Element.textContent = h1Element.textContent;
-                h4Element.classList.add("bold-font")
-                patchNotesBody.replaceChild(h4Element, h1Element);
-            });
-        }
-        else if (versionNow.includes("nightly")) {
-            let response = await fetch('/data/nightly_patch_notes.md');
-            let changes = await response.text();
-            let changesHTML = DOMPurify.sanitize(marked(changes));
-            patchNotesBody.innerHTML = changesHTML
-            let h1Elements = patchNotesBody.querySelectorAll("h1");
-
-            h1Elements.forEach(function (h1Element) {
-                let h4Element = document.createElement("h4");
-                h4Element.textContent = h1Element.textContent;
-                h4Element.classList.add("bold-font")
-                patchNotesBody.replaceChild(h4Element, h1Element);
-            });
-
-            let h2Elements = patchNotesBody.querySelectorAll("h2");
-            h2Elements.forEach(function (h1Element) {
-                let h4Element = document.createElement("h4");
-                h4Element.textContent = h1Element.textContent;
-                h4Element.classList.add("bold-font")
-                patchNotesBody.replaceChild(h4Element, h1Element);
-            });
-        }
-    } catch {
-        console.log("Couldn't find patch notes")
-    }
-
-
-}
-
-// Patreon OAuth Logic
-if (patreonLoginButton) {
-    patreonLoginButton.addEventListener('click', () => {
-        window.location.href = '/api/auth/patreon/login';
-    });
-}
-
-if (patreonToolLoginButton) {
-    patreonToolLoginButton.addEventListener('click', () => {
-        window.location.href = '/api/auth/patreon/login';
-    });
-}
-
-if (patreonLogoutButton) {
-    patreonLogoutButton.addEventListener('click', () => {
-        handleLogout();
-    });
-}
+// Patreon OAuth removed — all features unlocked
 
 if (userToolButton) {
     userToolButton.addEventListener('click', () => {
@@ -357,162 +288,40 @@ if (saveFileButton && saveFileInput) {
 
 
 
-async function handleLogout() {
-    try {
-        const response = await fetch('/api/auth/patreon/logout');
-
-        if (response.ok) {
-            console.log("Logout successful");
-
-            updatePatreonUI({ isLoggedIn: false, tier: 'Free', tierNumber: 0, whitelisted: false, paidMember: false });
-
-            window.location.reload();
-        }
-    } catch (error) {
-        console.error("Logout failed", error);
-    }
-}
-
-/**
- * Retrieves the user's Patreon tier from the cookie.
- * @returns {Promise<{paidMember: boolean, tier: string, tierNumber?: number, whitelisted: boolean, isLoggedIn: boolean, user: {fullName: string}}>} An object containing the user's tier information.
- */
 export async function getUserTier() {
-    try {
-        const response = await fetch('/api/me');
-        const data = await response.json();
-
-        // The structure matches what api/me.js returns
-        //set a window variable with the user data to be used in other places of the frontend without needing to call the api again
-        let windowData = {
-            paidMember: data.paidMember,
-            tier: data.tier,
-            tierNumber: data.tierNumber,
-            whitelisted: !!data.whitelisted,
-            isLoggedIn: data.isLoggedIn,
-        };
-        window.__USER_DATA__ = windowData;
-        windowData.user = { fullName: data.user?.fullName || '' };
-        return windowData;
-    } catch (error) {
-        console.error("Failed to check auth status", error);
-        return { paidMember: false, tier: 'Free', whitelisted: false, isLoggedIn: false };
-    }
+    const data = {
+        paidMember: true,
+        tier: 'Founder',
+        tierNumber: 3,
+        whitelisted: false,
+        isLoggedIn: true,
+    };
+    window.__USER_DATA__ = data;
+    data.user = { fullName: 'User' };
+    return data;
 }
 
-async function validateSession() {
-    try {
-        const res = await fetch("/api/check-cookie");
-        const data = await res.json();
-
-        // Only force an OAuth refresh when an existing cookie is detected but invalid/legacy.
-        // Not having a cookie simply means "not logged in" and should not redirect.
-        if (data.valid === false && data.hasCookie === true) {
-            console.log("Old Patreon cookie → redirecting to login");
-            window.location.href = "/api/auth/patreon/login";
-            return false;
-        }
-
-        return true;
-
-    } catch (err) {
-        console.error("Error checking Patreon session:", err);
-        return false;
-    }
-}
-
-// Check for OAuth code
-const urlParams = new URLSearchParams(window.location.search);
-const code = urlParams.get('code');
-
-if (code) {
-    console.log("There is code")
-    // Clear the code from URL to prevent re-submission on refresh
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-    fetch(`/api/auth/patreon/verify?code=${code}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                new_update_notifications(`Welcome ${data.user.fullName}! Tier: ${data.tier}`, "success");
-
-                // Update UI
-                updatePatreonUI(data);
-                maybeReloadForNightlyAccess(data);
-            } else {
-                new_update_notifications(`Login failed: ${data.error}`, "error");
-                updatePatreonUI(data);
-            }
-        })
-        .catch(err => {
-            console.error('Patreon verification error:', err);
-            new_update_notifications("Error verifying Patreon status", "error");
-        });
-} else {
-    validateSession().then(() => {
-        getUserTier().then(updatePatreonUI);
-    });
-}
-
-function maybeReloadForNightlyAccess(tierInfo) {
-    const isNightly = window.location.hostname.includes("nightly");
-    if (!isNightly) return;
-
-    const insiderOrFounder = tierInfo?.tier === "Insider" || tierInfo?.tier === "Founder";
-    if (nightlyBlock && tierInfo?.isLoggedIn && insiderOrFounder) {
-        setTimeout(() => window.location.reload(), 50);
-    }
-}
+// Initialize with Founder tier immediately
+getUserTier().then(updatePatreonUI);
 
 function updatePatreonUI(tier) {
-    hasPatreonThemeAccess = !!tier.paidMember;
+    hasPatreonThemeAccess = true;
     init_colors_dict(selectedTheme)
 
-    console.log("Updating Patreon UI with tier:", tier);
+    patreonUnlockables.classList.remove("d-none");
+    patreonThemes.classList.remove("d-none");
+    loadTheme();
 
-    if (tier.paidMember) {
-        patreonUnlockables.classList.remove("d-none");
-        patreonThemes.classList.remove("d-none");
-        document.getElementById("patreonStatusText").textContent = tier.tier
-        loadTheme();
-    }
-    else {
-        patreonUnlockables.classList.add("d-none");
-        patreonThemes.classList.add("d-none");
-        document.getElementById("patreonStatusText").textContent = tier.isLoggedIn ? tier.tier : "Not logged in"
-        selectedTheme = "default-theme";
-        document.querySelector("body").className = "font default-theme";
-        init_colors_dict(selectedTheme);
-        updateToolbarThemeLogo();
-        syncNightlyIndicator();
-    }
+    // Hide login/logout UI
+    if (patreonToolLoginButton) patreonToolLoginButton.classList.add("d-none");
+    const logoutTool = document.querySelector(".user-name-and-logout-tool");
+    if (logoutTool) logoutTool.classList.add("d-none");
+
     syncNightlyThemeVisibility();
-
-    const hasCreateNewsAccess = tier?.tierNumber === 3 || tier?.tier === "Founder" || !!tier?.whitelisted;
-    if (!hasCreateNewsAccess){
-        //remove the button from the DOM entirely
-        document.querySelector("#createCustomNews")?.remove();
-    }
-
-    if (tier.isLoggedIn) {
-        document.querySelector(".user-name-and-logout-tool").classList.remove("d-none");
-        document.getElementById("userToolName").textContent = tier.user.fullName;
-        patreonToolLoginButton.classList.add("d-none");
-    }
-    else {
-        document.querySelector(".user-name-and-logout-tool").classList.add("d-none");
-        patreonToolLoginButton.classList.remove("d-none");
-    }
-
     manageNewsStatus(tier);
 
     if (turningPointsFrequencyConfig) {
-        const insiderOrFounder = tier?.tier === "Insider" || tier?.tier === "Founder";
-        if (tier?.isLoggedIn && insiderOrFounder) {
-            turningPointsFrequencyConfig.classList.remove("d-none");
-        } else {
-            turningPointsFrequencyConfig.classList.add("d-none");
-        }
+        turningPointsFrequencyConfig.classList.remove("d-none");
     }
 }
 
@@ -1250,9 +1059,6 @@ if (glowSpot && blockDiv) {
 }
 
 export async function generateNews() {
-    const patreonTier = await getUserTier();
-    checkGenerableNews(patreonTier);
-
     // lanzar sin payload, el worker lee de DB
     new Command("generateNews", {}).execute();
 
@@ -2133,20 +1939,14 @@ document.querySelector(".toolbar-logo-and-title").addEventListener("click", func
 gamePill.addEventListener("click", function () {
     document.querySelector("#editorChanges").classList.add("d-none")
     document.querySelector("#gameChanges").classList.remove("d-none")
-    document.querySelector("#patreonChanges").classList.add("d-none")
 })
 
 editorPill.addEventListener("click", function () {
     document.querySelector("#editorChanges").classList.remove("d-none")
     document.querySelector("#gameChanges").classList.add("d-none")
-    document.querySelector("#patreonChanges").classList.add("d-none")
 })
 
-patreonPill.addEventListener("click", function () {
-    document.querySelector("#patreonChanges").classList.remove("d-none")
-    document.querySelector("#editorChanges").classList.add("d-none")
-    document.querySelector("#gameChanges").classList.add("d-none")
-})
+// Patreon pill removed
 
 if (turningPointsFrequencySlider) {
     updateTurningPointsFrequencyUI();
@@ -2374,61 +2174,13 @@ function manageNewsStatus(patreonTier) {
 }
 
 function checkGenerableNews(patreonTier) {
-    let canGenerate = "no";
-    newsAvailable.normal = false;
-    newsAvailable.turning = false;
-    if (patreonTier.paidMember) {
-        canGenerate = "yes";
-        if (patreonTier.tier === "Insider" || patreonTier.tier === "Founder") {
-            newsAvailable.normal = true;
-            newsAvailable.turning = true;
-        }
-        else if (patreonTier.tier === "Backer") {
-            newsAvailable.normal = true;
-            newsAvailable.turning = false;
-        }
-    }
-    return canGenerate;
+    newsAvailable.normal = true;
+    newsAvailable.turning = true;
+    return "yes";
 }
 
 
-async function checkOpenSlideUp() {
-    const tier = await getUserTier();
-    if (tier.paidMember) return;
-
-    const lastShownStr = localStorage.getItem('patreonModalLastShown');
-    if (!canShowPatreonModal(lastShownStr)) {
-        return;
-    }
-
-    const delaySec = 5;
-    setTimeout(() => {
-        showPatreonModal();
-        localStorage.setItem('patreonModalLastShown', new Date().toISOString());
-    }, delaySec * 1000);
-}
-
-
-function showPatreonModal() {
-    patreonLogo.classList.add("open-slide-up")
-    setTimeout(() => {
-        patreonSlideUp.classList.add("open")
-    }, 350);
-}
-
-slideUpClose.addEventListener('click', () => {
-    patreonSlideUp.classList.remove("open");
-    patreonLogo.className = "bi-custom-patreon close-slide-up"
-});
-
-
-function canShowPatreonModal(lastShown) {
-    if (!lastShown) return true; // Nunca se mostró, podemos mostrarlo
-    const last = new Date(lastShown).getTime();
-    const now = Date.now();
-    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
-    return diffDays >= 1;
-}
+// Patreon slide-up modal removed
 
 init_colors_dict()
 document.addEventListener('DOMContentLoaded', async () => {
@@ -2442,35 +2194,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isNightly) {
         const favicon = document.querySelector('link[rel="icon"]'); //testing
         if (favicon) favicon.href = "../assets/images/logoNightly.png";
-
-        const tierInfo = await getUserTier();
-        let restrictionMessage = null;
-        const insiderOrFounder = tierInfo.tier === "Insider" || tierInfo.tier === "Founder";
-
-        if (tierInfo.isLoggedIn && !insiderOrFounder) {
-            restrictionMessage = "Please upgrade to the Insider or Founder tier on Patreon to access the nightly version.";
-        } else if (!tierInfo.isLoggedIn) {
-            restrictionMessage = "Please log in with your Patreon account to access the nightly version.";
-        }
-
-        if (restrictionMessage !== null) {
-            nightlyBlock = true;
-            const dropDiv = document.querySelector(".drop-div");
-            dropDiv.removeEventListener("dragover", handleDragOver);
-            dropDiv.removeEventListener("dragenter", handleDragEnter);
-            dropDiv.removeEventListener("dragleave", handleDragLeave);
-            dropDiv.removeEventListener("drop", handleDrop);
-            document.getElementById("statusIcon").className = "bi bi-lock";
-            document.getElementById("statusTitle").textContent = "Nightly version is only available for patrons.";
-            document.getElementById("statusDesc").textContent = restrictionMessage;
-
-            const recentsContainer = document.querySelector(".recents-container");
-            if (recentsContainer) recentsContainer.remove();
-
-            document.querySelectorAll(".script-view").forEach(div => {
-                div.remove();
-            });
-        }
 
         const now = new Date();
         const day = String(now.getDate()).padStart(2, '0');
@@ -2488,20 +2211,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     updateToolbarThemeLogo();
     syncNightlyThemeVisibility();
-
-    updateRateLimitsDisplay();
-
-    const storedVersion = localStorage.getItem('lastVersion'); // Última versión guardada
-    versionPanel.textContent = `${versionNow}`;
-    versionBadge.textContent = `Version ${versionNow}`;
-    parchModalTitle.textContent = "Version " + versionNow + " patch notes"
-    getPatchNotes()
-
-    if (shouldShowPatchModal(storedVersion, versionNow)) {
-        localStorage.setItem('lastVersion', versionNow); // Guardar nueva versión
-        const patchModal = new bootstrap.Modal(document.getElementById('patchModal'));
-        patchModal.show();
-    }
 
     let recents = await getRecentHandles();
     populateRecentHandles(recents);
@@ -2569,54 +2278,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     animateTextLoop();
 });
 
-export async function updateRateLimitsDisplay() {
-  try {
-    const res = await fetch("/api/usage-today");
-    if (!res.ok) return;
-
-    const { used, limit, percentage } = await res.json();
-
-    const fill = document.getElementById("limitBarFill");
-    const text = document.getElementById("limitText");
-    const container = document.getElementById("rateLimitContainer");
-
-    //100% corresponds to not using any
-    fill.style.width = `${100 - percentage}%`;
-
-    // limpiar estados previos
-    container.classList.remove(
-      "rate-ok",
-      "rate-warning",
-      "rate-danger",
-      "rate-blocked"
-    );
-
-    let message = "";
-    let state = "";
-
-    if (percentage === 0) {
-        state = "rate-ok";
-        message = "All requests available";
-    } else if (percentage < 50) {
-        state = "rate-ok";
-        message = "Plenty of requests available";
-    } else if (percentage < 80) {
-        state = "rate-warning";
-        message = "You're halfway through today's limit";
-    } else if (percentage < 100) {
-        state = "rate-danger";
-        message = "Only a few requests left today";
-    } else {
-        state = "rate-blocked";
-        message = "Daily limit reached";
-    }
-
-    container.classList.add(state);
-    text.textContent = message;
-
-  } catch (err) {
-    console.error("Failed to update rate limits display:", err);
-  }
+export function updateRateLimitsDisplay() {
+    // No-op — rate limiting removed
 }
 
 
@@ -2730,11 +2393,6 @@ function updateToolbarThemeLogo() {
         if (meta?.className) logoImg.classList.remove(meta.className);
     });
 
-    if (!hasPatreonThemeAccess) {
-        logoImg.src = "../assets/images/logoVector.svg";
-        return;
-    }
-
     const bodyThemeClass = Array.from(document.body.classList).find(className => className.endsWith("-theme"));
     const appliedTheme = (bodyThemeClass || selectedTheme || "").toLowerCase();
 
@@ -2772,7 +2430,7 @@ function syncNightlyThemeVisibility() {
     const nightlyCard = document.querySelector('.one-theme[data-theme="nightly-theme"]');
     if (!nightlyCard) return;
 
-    const showNightlyTheme = isNightlyHost && hasPatreonThemeAccess;
+    const showNightlyTheme = isNightlyHost;
     nightlyCard.classList.toggle("d-none", !showNightlyTheme);
 
     if (!showNightlyTheme && selectedTheme === "nightly-theme") {
@@ -2787,7 +2445,6 @@ function syncNightlyThemeVisibility() {
 
 document.querySelectorAll(".one-theme").forEach(function (elem) {
     elem.addEventListener("click", function () {
-        if (!hasPatreonThemeAccess) return;
         if (elem.dataset.theme === "nightly-theme" && !isNightlyHost) return;
         selectedTheme = elem.dataset.theme
         document.querySelector(".one-theme.active").classList.remove("active")
@@ -2811,7 +2468,7 @@ function loadTheme() {
     let theme = localStorage.getItem("theme")
     const savedThemeButton = theme ? document.querySelector(`.one-theme[data-theme="${theme}"]`) : null;
 
-    if (!theme && isNightlyHost && hasPatreonThemeAccess) {
+    if (!theme && isNightlyHost) {
         theme = "nightly-theme"
     }
 
@@ -2921,20 +2578,6 @@ document.getElementById('logButton').addEventListener('click', function () {
     doc.body.appendChild(body);
 });
 
-/**
- * Verifies if the patch modal should be shown
- * @param {string|null} storedVersion - Version stored in localStorage
- * @param {string} versionNow - Current version of the app
- * @returns {boolean} - True if the modal should be shown, false otherwise
- */
-function shouldShowPatchModal(storedVersion, versionNow) {
-    if (!storedVersion) return true; // Si no hay una versión guardada, mostrar el modal
-
-    const storedParts = storedVersion.split('.').map(Number);
-    const currentParts = versionNow.split('.').map(Number);
-
-    return storedParts[0] < currentParts[0] || storedParts[1] < currentParts[1];
-}
 
 document.querySelectorAll(".team-logo-container").forEach(function (elem) {
     elem.addEventListener("click", function () {
