@@ -1732,6 +1732,13 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link bold-font scriptPills" data-bs-toggle="pill" id="presetspill">
+              <i class="bi bi-sliders pill-icon"></i>
+              <label class="bold-font pill-label">PRESETS</label>
+              <div class="pill-line"></div>
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link bold-font scriptPills" data-bs-toggle="pill" id="modpill">
               <i class="bi bi-layers-half pill-icon"></i>
               <label class="bold-font pill-label">MODS</label>
@@ -5879,6 +5886,27 @@
           </div>
         </div>
 
+      </div>
+      <div class="script-view hide unloaded" id="design_presets">
+        <div class="general-top-panel">
+          <div class="title-buttons-left">
+            <h5 class="bold-font" style="margin: 0; color: var(--text-color);">Design Focus Presets</h5>
+          </div>
+        </div>
+        <div class="presets-content" id="presetsContent">
+          <div class="presets-existing" id="presetsExisting"></div>
+          <div class="presets-add-section" id="presetsAddSection">
+            <h6 class="bold-font" style="color: var(--text-color); margin-top: 1rem;">Add New Preset</h6>
+            <div class="presets-add-form" id="presetsAddForm">
+              <div class="presets-name-row">
+                <label class="bold-font" style="color: var(--text-color);">Preset Name</label>
+                <input type="text" class="custom-input-number preset-name-input" id="presetNameInput" placeholder="e.g. MaxDownforce">
+              </div>
+              <div id="presetsSliders"></div>
+              <button class="btn btn-sm bold-font preset-add-btn" id="presetAddBtn">Add Preset</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="script-view hide unloaded" id="season_mods">
         <div class="general-top-panel" id="modSelectPanel">

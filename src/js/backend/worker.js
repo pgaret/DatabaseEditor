@@ -17,7 +17,7 @@ import { getPerformanceAllTeamsSeason, getAttributesAllTeams, getPerformanceAllC
 import { setDatabase, getMetadata, getDatabase } from "./dbManager";
 import { fetchHead2Head, fetchHead2HeadTeam } from "./scriptUtils/head2head";
 import { editTeam, fetchTeamData } from "./scriptUtils/editTeamUtils";
-import { overwritePerformanceTeam, updateItemsForDesignDict, fitLoadoutsDict, getPartsFromTeam, getUnitValueFromParts, getAllPartsFromTeam, getMaxDesign, getUnitValueFromOnePart, deleteCustomEngineAndReassign, getTeamExpertise, updateTeamExpertise } from "./scriptUtils/carAnalysisUtils";
+import { overwritePerformanceTeam, updateItemsForDesignDict, fitLoadoutsDict, getPartsFromTeam, getUnitValueFromParts, getAllPartsFromTeam, getMaxDesign, getUnitValueFromOnePart, deleteCustomEngineAndReassign, getTeamExpertise, updateTeamExpertise, getDesignFocusPresets, addDesignFocusPreset } from "./scriptUtils/carAnalysisUtils";
 import { setGlobals, getGlobals } from "./commandGlobals";
 import { editAge, editMarketability, editName, editRetirement, editSuperlicense, editCode, editMentality, editStats, setAllDriversStatsTo85 } from "./scriptUtils/eidtStatsUtils";
 import { editCalendar, fetchCalendar } from "./scriptUtils/calendarUtils";
@@ -458,6 +458,21 @@ const workerCommands = {
       unlocksDownload: true
     };
     postMessage(carPerformanceResponse);
+  },
+  designPresetsRequest: (data, postMessage) => {
+    const presets = getDesignFocusPresets();
+    postMessage({ responseMessage: "Design presets fetched", content: presets });
+  },
+  addDesignPreset: (data, postMessage) => {
+    addDesignFocusPreset(data.name, data.parts);
+    postMessage({
+      responseMessage: "Design preset added",
+      noti_msg: `Added preset "${data.name}"`,
+      isEditCommand: true,
+      unlocksDownload: true
+    });
+    const presets = getDesignFocusPresets();
+    postMessage({ responseMessage: "Design presets fetched", content: presets });
   },
   editEngine: (data, postMessage) => {
     snapshotEnginePowerProgression(Object.keys(data?.engines || {}), 'pre_engine_edit');

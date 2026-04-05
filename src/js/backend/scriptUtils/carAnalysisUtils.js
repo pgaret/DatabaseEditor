@@ -1723,4 +1723,78 @@ export function deleteCustomEngineAndReassign(engineIdRaw, fallbackEngineIdRaw) 
 }
 
 
+/**
+ * Fetches all design focus presets with their names and stat values.
+ * Returns { presets: [...], defaultPartsStats }
+ */
+export function getDesignFocusPresets() {
+    const enumRows = queryDB(
+        `SELECT Value, Name FROM Parts_Enum_EmphasisPresets ORDER BY Value`,
+        [],
+        'allRows'
+    ) || [];
+
+    const nameMap = {};
+    for (const row of enumRows) {
+        nameMap[row[0]] = row[1];
+    }
+
+    const rows = queryDB(
+        `SELECT Preset, PartType, PartStat, DesignFocus FROM Parts_DesignFocusPresets ORDER BY Preset, PartType, PartStat`,
+        [],
+        'allRows'
+    ) || [];
+
+    const presetsMap = {};
+    for (const row of rows) {
+        const [presetId, partType, partStat, designFocus] = row;
+        if (!presetsMap[presetId]) {
+            presetsMap[presetId] = { id: presetId, name: nameMap[presetId] || `Preset ${presetId}`, parts: {} };
+        }
+        if (!presetsMap[presetId].parts[partType]) {
+            presetsMap[presetId].parts[partType] = {};
+        }
+        presetsMap[presetId].parts[partType][partStat] = designFocus;
+    }
+
+    return {
+        presets: Object.values(presetsMap),
+        defaultPartsStats: carConstants.defaultPartsStats,
+        statsNames: carConstants.stats,
+        partsNames: carConstants.parts
+    };
+}
+
+/**
+ * Adds a new design focus preset to the save file.
+ * @param {string} name - Display name for the preset
+ * @param {Object} partsData - { [partType]: { [partStat]: focusValue } }
+ */
+export function addDesignFocusPreset(name, partsData) {
+    const maxRow = queryDB(
+        `SELECT MAX(Value) FROM Parts_Enum_EmphasisPresets`,
+        [],
+        'singleValue'
+    );
+    const newId = (maxRow ?? 0) + 1;
+
+    queryDB(
+        `INSERT INTO Parts_Enum_EmphasisPresets (Value, Name) VALUES (?, ?)`,
+        [newId, name],
+        'run'
+    );
+
+    for (const partType of Object.keys(partsData)) {
+        const stats = partsData[partType];
+        for (const partStat of Object.keys(stats)) {
+            queryDB(
+                `INSERT INTO Parts_DesignFocusPresets (Preset, PartType, PartStat, DesignFocus) VALUES (?, ?, ?, ?)`,
+                [newId, Number(partType), Number(partStat), stats[partStat]],
+                'run'
+            );
+        }
+    }
+
+    return newId;
+}
 

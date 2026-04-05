@@ -20316,3 +20316,143 @@ p.news-error-api-key {
   height: 24px;
   object-fit: contain;
 }
+
+/* Design Focus Presets Tab */
+.presets-content {
+  padding: 1rem 2rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 60px);
+}
+
+.preset-card {
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.preset-card-title {
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.preset-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.preset-table th,
+.preset-table td {
+  padding: 6px 10px;
+  text-align: center;
+  color: var(--text-color);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.preset-table th {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.preset-table th:first-child,
+.preset-table td:first-child {
+  text-align: left;
+}
+
+.preset-name-cell {
+  white-space: nowrap;
+}
+
+.focus-high {
+  color: #4ade80;
+}
+
+.focus-low {
+  color: #f87171;
+}
+
+.focus-mid {
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.presets-add-section {
+  margin-top: 1.5rem;
+}
+
+.presets-add-form {
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.presets-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.preset-name-input {
+  max-width: 250px;
+}
+
+.preset-part-section {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.preset-part-title {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.preset-sliders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.4rem 1.5rem;
+}
+
+.preset-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.preset-slider-label {
+  color: var(--text-color);
+  font-size: 0.8rem;
+  min-width: 140px;
+  opacity: 0.8;
+}
+
+.preset-slider {
+  flex: 1;
+  accent-color: var(--primary-color, #6366f1);
+}
+
+.preset-slider-value {
+  color: var(--text-color);
+  font-size: 0.8rem;
+  min-width: 28px;
+  text-align: right;
+}
+
+.preset-add-btn {
+  margin-top: 0.75rem;
+  background: var(--primary-color, #6366f1);
+  color: white;
+  border: none;
+  padding: 6px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.preset-add-btn:hover {
+  opacity: 0.85;
+}
