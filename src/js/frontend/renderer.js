@@ -594,7 +594,7 @@ export async function updateFront(data) {
     console.log(data)
     let responseTyppe = data.responseMessage
     let message = data.content
-    let handler = messageHandlers[responseTyppe];
+    let handler = messageHandlers?.[responseTyppe];
     if (handler) {
         handler(message);
     }
@@ -697,7 +697,7 @@ function orderTeamTemplatesByStandings(standingsRows) {
 }
 
 
-const messageHandlers = {
+var messageHandlers = {
     "ERROR": (message) => {
         update_notifications(message[1], "error");
     },
