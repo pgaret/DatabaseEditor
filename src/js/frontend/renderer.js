@@ -991,72 +991,7 @@ async function migrateLegacyNewsOnce() {
 }
 
 
-if (glowSpot && blockDiv) {
-    const defaultPosition = {
-        left: '50%',
-        top: '0',
-        transform: 'translateX(-50%)',
-    };
-
-    let restoreTimeout;
-
-    const isLandingVisible = () => !blockDiv.classList.contains('disappear');
-
-    const rootStyle = document.documentElement.style;
-    const setGlowVars = (x, y) => {
-        rootStyle.setProperty('--glow-x', x);
-        rootStyle.setProperty('--glow-y', y);
-    };
-
-    const syncGlowVarsToGlowSpotCenter = () => {
-        const rect = glowSpot.getBoundingClientRect();
-        setGlowVars(`${rect.left + rect.width / 2}px`, `${rect.top + rect.height / 2}px`);
-    };
-
-    const resetGlowSpotPosition = () => {
-        glowSpot.style.left = defaultPosition.left;
-        glowSpot.style.top = defaultPosition.top;
-        glowSpot.style.transform = defaultPosition.transform;
-        syncGlowVarsToGlowSpotCenter();
-    };
-
-    const updateGlowSpotPosition = (event) => {
-        if (!isLandingVisible()) {
-            return;
-        }
-
-        glowSpot.classList.remove('glow-spot--off');
-        const x = `${event.clientX}px`;
-        const y = `${event.clientY}px`;
-        glowSpot.style.left = x;
-        glowSpot.style.top = y;
-        glowSpot.style.transform = 'translate(-50%, -50%)';
-        setGlowVars(x, y);
-    };
-
-    const fadeToDefaultPosition = () => {
-        glowSpot.classList.add('glow-spot--off');
-
-        clearTimeout(restoreTimeout);
-        restoreTimeout = setTimeout(() => {
-            resetGlowSpotPosition();
-            glowSpot.classList.remove('glow-spot--off');
-        }, 200);
-    };
-
-    const observer = new MutationObserver(() => {
-        if (isLandingVisible()) {
-            glowSpot.classList.remove('glow-spot--off');
-        } else {
-            fadeToDefaultPosition();
-        }
-    });
-
-    observer.observe(blockDiv, { attributes: true, attributeFilter: ['class'] });
-
-    resetGlowSpotPosition();
-    window.addEventListener('mousemove', updateGlowSpotPosition);
-}
+// Landing page glow animation removed
 
 export async function generateNews() {
     // lanzar sin payload, el worker lee de DB
@@ -2216,66 +2151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateRecentHandles(recents);
 
 
-    let phrases = [
-        "Change the contract of every staff available in game",
-        "Customize your calendar however you want it",
-        "Edit the attributes of each driver just how you want them",
-        "Create your own custom engines",
-        "Get stories from your save using AI",
-        "Compare drivers and teams with detailed graphs",
-        "Modify car performance to your liking",
-        "Fix game-breaking issues with ease",
-        "No installation required, works in your browser",
-        "Honda, for the love of god, give Alonso a good engine for once",
-        "In memory of Aloy"
-    ];
-
-    //reorder them randomly
-    phrases = phrases.sort(() => Math.random() - 0.5);
-
-    const animatedText = document.getElementById('animatedText');
-    const fakeText = document.querySelector('.fake-text');
-    let phraseIndex = 0;
-
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    async function animateTextLoop() {
-        while (true) {
-            const currentPhrase = phrases[phraseIndex];
-            fakeText.textContent = currentPhrase;
-
-            // Typing phase
-            for (let i = 0; i < currentPhrase.length; i++) {
-                const char = currentPhrase[i];
-                const span = document.createElement('span');
-                span.className = 'char';
-                span.textContent = char;
-                animatedText.appendChild(span);
-                await sleep(10); // Typing speed
-            }
-
-            // Wait phase (read time)
-            await sleep(5000);
-
-            // Deleting phase
-            while (animatedText.firstChild) {
-                if (animatedText.lastChild) {
-                    animatedText.removeChild(animatedText.lastChild);
-                }
-                await sleep(8); // Deleting speed
-            }
-
-            // Move to next phrase
-            phraseIndex = (phraseIndex + 1) % phrases.length;
-
-            // Small pause before typing next one
-            await sleep(200);
-        }
-    }
-
-    // Clear initial text and start animation loop
-    animatedText.innerHTML = '';
-    animateTextLoop();
+    // Typing text animation removed
 });
 
 export function updateRateLimitsDisplay() {
