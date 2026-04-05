@@ -634,9 +634,6 @@ export async function updateFront(data) {
     if (data.noti_msg !== undefined) {
         new_update_notifications(data.noti_msg, "success");
     }
-    if (data.isEditCommand !== undefined) {
-        checkOpenSlideUp()
-    }
     if (data.unlocksDownload !== undefined) {
         downloadSaveButton.classList.remove("hidden")
     }
