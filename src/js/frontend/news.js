@@ -826,44 +826,6 @@ function createNewsItemElement(news, index, newsAvailable, newsList, maxDate, is
   imageContainer.appendChild(image);
 
 
-  if (news.hiddenByAvailability) {
-    const blockedDiv = document.createElement('div');
-    blockedDiv.classList.add('no-image-by-availability');
-    const lockIcon = document.createElement('i');
-    lockIcon.classList.add('bi', 'bi-lock', 'no-image-lock-icon');
-    const infoSpan = document.createElement('span');
-    infoSpan.classList.add('no-image-info');
-    blockedDiv.appendChild(lockIcon);
-    blockedDiv.appendChild(infoSpan);
-    newsTitle.classList.add('disabled-title');
-    const secondLockIcon = document.createElement('i');
-    secondLockIcon.classList.add('bi', 'bi-lock-fill', 'disabled-title-lock-icon');
-    titleAndArticle.prepend(secondLockIcon);
-    newsTitle.textContent = "Backer-only content";
-    imageContainer.appendChild(blockedDiv);
-    if (news.turning_point_type === undefined) {
-      infoSpan.innerHTML = "Subscribe to the <span class='bold-font'>BACKER</span> tier to unlock and read all news articles!";
-      newsTitle.textContent = "Backer-only content";
-    }
-    else {
-      infoSpan.innerHTML = "Subscribe to the <span class='bold-font'>INSIDER</span> tier to read and <span class='bold-font'>DECIDE</span> the outcome of turning points!";
-      newsTitle.textContent = "Insider-only content";
-    }
-
-    const patreonButton = document.createElement('a');
-    patreonButton.classList.add('patreon-button');
-    patreonButton.href = "https://www.patreon.com/cw/f1dbeditor/membership";
-    //open in a new window
-    patreonButton.target = "_blank";
-    const patreonIcon = document.createElement('div');
-    patreonIcon.classList.add('patreon-button-logo');
-    const patreonSpan = document.createElement('span');
-    patreonSpan.classList.add('patreon-button-text');
-    patreonSpan.textContent = "Support us on Patreon";
-    patreonButton.appendChild(patreonIcon);
-    patreonButton.appendChild(patreonSpan);
-    blockedDiv.appendChild(patreonButton);
-  }
 
 
   addReadButtonListener(readButton, newsItem, news, newsList);

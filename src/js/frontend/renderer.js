@@ -59,8 +59,6 @@ const modPill = document.getElementById("modpill")
 
 export const editorPill = document.getElementById("editorPill")
 export const gamePill = document.getElementById("gamePill")
-const patreonPill = document.getElementById("patreonPill")
-
 const driverTransferDiv = document.getElementById("driver_transfers");
 const editStatsDiv = document.getElementById("edit_stats");
 const customCalendarDiv = document.getElementById("custom_calendar");
@@ -72,12 +70,7 @@ const teamsDiv = document.getElementById("edit_teams");
 const seasonModsDiv = document.getElementById("season_mods")
 const newsDiv = document.getElementById("news")
 
-const patchNotesBody = document.getElementById("patchNotesBody")
 const selectImageButton = document.getElementById('selectImage');
-const patreonLoginButton = document.getElementById('patreonLoginButton');
-const patreonLogoutButton = document.getElementById('patreonLogoutButton');
-const patreonToolLoginButton = document.getElementById('patreonToolLoginButton');
-const userToolButton = document.getElementById('userToolButton');
 const saveFileButton = document.getElementById('saveFileButton');
 
 const scriptsArray = [newsDiv, h2hDiv, viewDiv, driverTransferDiv, editStatsDiv, teamsDiv, customCalendarDiv, regulationsDiv, carPerformanceDiv, seasonModsDiv]
@@ -106,15 +99,9 @@ const dropDownMenu = document.getElementById("dropdownMenu");
 const notificationPanel = document.getElementById("notificationPanel");
 
 const logButton = document.getElementById("logFileButton");
-const patreonLogo = document.querySelector(".footer .bi-custom-patreon");
-const patreonSlideUp = document.querySelector(".patreon-slide-up");
-const slideUpClose = document.getElementById("patreonSlideUpClose")
-const patreonUnlockables = document.querySelector(".patreon-unlockables")       
-const downloadSaveButton = document.querySelector(".download-save-button")      
+const downloadSaveButton = document.querySelector(".download-save-button")
 const downloadSaveProgress = document.getElementById("downloadSaveProgress");
 const downloadSaveProgressFill = document.getElementById("downloadSaveProgressFill");
-
-const patreonThemes = document.querySelector(".patreon-themes");
 
 const status = document.querySelector(".status-info")
 const updateInfo = document.querySelector(".update-info")
@@ -186,23 +173,16 @@ let viewerLoaded = false;
 
 export let selectedTheme = "default-theme";
 let isNightlyHost = false;
-let hasPatreonThemeAccess = true;
-
 let newsAvailable = {
     "normal": true,
     "turning": true,
 }
 
 let versionNow;
-const versionPanel = document.querySelector('.version-panel');
-const versionBadge = document.querySelector('.badge-version');
-const parchModalTitle = document.getElementById("patchModalTitle")
 
 let notificationsQueue = [];
 let isShowingNotification = false;
 
-const repoOwner = 'IUrreta';
-const repoName = 'DatabaseEditor';
 
 
 
@@ -301,29 +281,16 @@ export async function getUserTier() {
     return data;
 }
 
-// Initialize with Founder tier immediately
-getUserTier().then(updatePatreonUI);
-
-function updatePatreonUI(tier) {
-    hasPatreonThemeAccess = true;
-    init_colors_dict(selectedTheme)
-
-    patreonUnlockables.classList.remove("d-none");
-    patreonThemes.classList.remove("d-none");
+// Initialize with full access
+getUserTier().then((tier) => {
+    init_colors_dict(selectedTheme);
     loadTheme();
-
-    // Hide login/logout UI
-    if (patreonToolLoginButton) patreonToolLoginButton.classList.add("d-none");
-    const logoutTool = document.querySelector(".user-name-and-logout-tool");
-    if (logoutTool) logoutTool.classList.add("d-none");
-
     syncNightlyThemeVisibility();
     manageNewsStatus(tier);
-
     if (turningPointsFrequencyConfig) {
         turningPointsFrequencyConfig.classList.remove("d-none");
     }
-}
+});
 
 
 
@@ -2138,7 +2105,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         versionNow = `${APP_VERSION.replace("-dev", "")}.nightly.${day}-${month}-${year}.${shortBuildId}`;
         //remove -dev from APP_VERSION
 
-        versionPanel.classList.add("nightly");
     }
 
     updateToolbarThemeLogo();
