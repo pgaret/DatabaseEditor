@@ -233,17 +233,6 @@ export function setIsShowingNotification(value) {
  */
 // Patch notes removed
 
-// Patreon OAuth removed — all features unlocked
-
-if (userToolButton) {
-    userToolButton.addEventListener('click', () => {
-        const userToolMenu = document.querySelector('.userToolMenu');
-        if (userToolMenu) {
-            userToolMenu.classList.toggle('hidden');
-        }
-    });
-}
-
 if (saveFileButton && saveFileInput) {
     saveFileInput.addEventListener('change', async (event) => {
         const file = event.target.files[0];
