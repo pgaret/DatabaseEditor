@@ -3723,7 +3723,7 @@ body.og-theme .main-calendar-section {
 #head2head_viewer,
 #car_performance,
 #season_mods,
-#news {
+#design_presets {
   flex-direction: column;
 }
 
@@ -10574,11 +10574,11 @@ body.og-theme .records-list {
   width: 150px;
 }
 
-#newspill:hover,
-#newspill:hover .pill-line,
-#newspill.active .pill-line,
-#newspill.active {
-  width: 81px;
+#presetspill:hover,
+#presetspill:hover .pill-line,
+#presetspill.active .pill-line,
+#presetspill.active {
+  width: 115px;
 }
 
 #viewerpill:hover,
