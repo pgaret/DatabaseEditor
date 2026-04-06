@@ -16,18 +16,34 @@ const statPrettyNames = {
     3: "DRS Delta",
     4: "Drag Reduction",
     5: "Engine Cooling",
-    6: "Fuel Efficiency",
-    7: "Low Speed Downforce",
-    8: "Medium Speed Downforce",
-    9: "High Speed Downforce",
-    10: "Power",
-    11: "Performance Loss",
-    12: "Performance Threshold",
+    7: "Low Speed",
+    8: "Medium Speed",
+    9: "High Speed",
     13: "Airflow Middle",
-    14: "Operational Range",
-    15: "Lifespan",
-    16: "Weight"
+    15: "Minimum Lifespan"
 };
+
+// Category grouping matching the in-game design focus UI
+const statCategories = {
+    "Velocity":   [3, 4],
+    "Downforce":  [7, 8, 9],
+    "Cooling":    [2, 5],
+    "Airflow":    [0, 1, 13],
+    "Durability": [15]
+};
+
+// Which stats each part type actually has (mirrors defaultPartsStats from carConstants)
+// Order matches the game UI: Velocity → Downforce → Cooling → Airflow → Durability
+function getGroupedStats(partStats) {
+    const groups = [];
+    for (const [category, statIds] of Object.entries(statCategories)) {
+        const matching = statIds.filter(s => partStats.includes(s));
+        if (matching.length > 0) {
+            groups.push({ category, stats: matching });
+        }
+    }
+    return groups;
+}
 
 export function load_design_presets(data) {
     cachedData = data;
@@ -84,9 +100,10 @@ function renderPresetsTables(data) {
             for (const stat of partStats) {
                 const td = document.createElement("td");
                 const val = preset.parts[partType]?.[stat];
-                td.textContent = val != null ? val : "-";
                 if (val != null) {
-                    td.className = getFocusClass(val);
+                    td.appendChild(createMiniBar(val));
+                } else {
+                    td.textContent = "-";
                 }
                 row.appendChild(td);
             }
@@ -98,10 +115,26 @@ function renderPresetsTables(data) {
     }
 }
 
-function getFocusClass(val) {
-    if (val >= 0.8) return "focus-high";
-    if (val <= 0.2) return "focus-low";
-    return "focus-mid";
+function createMiniBar(val) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "preset-mini-bar-wrap";
+
+    const bar = document.createElement("div");
+    bar.className = "preset-mini-bar";
+
+    const fill = document.createElement("div");
+    fill.className = "preset-mini-bar-fill";
+    fill.style.width = (val * 100) + "%";
+
+    bar.appendChild(fill);
+
+    const label = document.createElement("span");
+    label.className = "preset-mini-bar-label";
+    label.textContent = val;
+
+    wrapper.appendChild(bar);
+    wrapper.appendChild(label);
+    return wrapper;
 }
 
 function formatPresetName(name) {
@@ -117,52 +150,66 @@ function renderAddForm(data) {
     for (const partType of partTypes) {
         const partName = part_full_names[partType] || `Part ${partType}`;
         const partStats = defaultPartsStats[partType];
+        const groups = getGroupedStats(partStats);
 
         const section = document.createElement("div");
         section.className = "preset-part-section";
         section.dataset.partType = partType;
 
+        const partHeader = document.createElement("div");
+        partHeader.className = "preset-part-header";
+
         const partTitle = document.createElement("div");
         partTitle.className = "bold-font preset-part-title";
         partTitle.textContent = partName;
-        section.appendChild(partTitle);
+        partHeader.appendChild(partTitle);
 
-        const grid = document.createElement("div");
-        grid.className = "preset-sliders-grid";
+        section.appendChild(partHeader);
 
-        for (const stat of partStats) {
-            const sliderRow = document.createElement("div");
-            sliderRow.className = "preset-slider-row";
+        for (const group of groups) {
+            const catLabel = document.createElement("div");
+            catLabel.className = "preset-category-label bold-font";
+            catLabel.textContent = group.category;
+            section.appendChild(catLabel);
 
-            const label = document.createElement("label");
-            label.className = "preset-slider-label";
-            label.textContent = statPrettyNames[stat] || `Stat ${stat}`;
+            for (const stat of group.stats) {
+                const sliderRow = document.createElement("div");
+                sliderRow.className = "preset-slider-row";
 
-            const range = document.createElement("input");
-            range.type = "range";
-            range.min = "0";
-            range.max = "1";
-            range.step = "0.1";
-            range.value = "0.5";
-            range.className = "preset-slider";
-            range.dataset.partType = partType;
-            range.dataset.partStat = stat;
+                const label = document.createElement("label");
+                label.className = "preset-slider-label";
+                label.textContent = statPrettyNames[stat] || `Stat ${stat}`;
 
-            const valDisplay = document.createElement("span");
-            valDisplay.className = "preset-slider-value";
-            valDisplay.textContent = "0.5";
+                const trackWrap = document.createElement("div");
+                trackWrap.className = "preset-slider-track-wrap";
 
-            range.addEventListener("input", () => {
-                valDisplay.textContent = range.value;
-            });
+                const range = document.createElement("input");
+                range.type = "range";
+                range.min = "0";
+                range.max = "1";
+                range.step = "0.05";
+                range.value = "0.5";
+                range.className = "preset-slider";
+                range.dataset.partType = partType;
+                range.dataset.partStat = stat;
 
-            sliderRow.appendChild(label);
-            sliderRow.appendChild(range);
-            sliderRow.appendChild(valDisplay);
-            grid.appendChild(sliderRow);
+                const valDisplay = document.createElement("span");
+                valDisplay.className = "preset-slider-value";
+                valDisplay.textContent = "50%";
+
+                range.addEventListener("input", () => {
+                    valDisplay.textContent = Math.round(range.value * 100) + "%";
+                });
+
+                trackWrap.appendChild(range);
+
+                sliderRow.appendChild(label);
+                sliderRow.appendChild(trackWrap);
+                sliderRow.appendChild(valDisplay);
+                section.appendChild(sliderRow);
+            }
         }
 
-        section.appendChild(grid);
         presetsSliders.appendChild(section);
     }
 }
@@ -195,6 +242,6 @@ presetAddBtn.addEventListener("click", () => {
     presetNameInput.value = "";
     presetsSliders.querySelectorAll(".preset-slider").forEach(slider => {
         slider.value = "0.5";
-        slider.nextElementSibling.textContent = "0.5";
+        slider.nextElementSibling.textContent = "50%";
     });
 });
