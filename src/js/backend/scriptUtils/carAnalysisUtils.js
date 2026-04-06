@@ -1839,21 +1839,21 @@ export function ensureNerobaxPreset() {
             1: 0,    // Airflow Sensitivity
             15: 0    // Lifespan
         },
-        // Sidepods (6): Drag Reduction, Engine Cooling, Airflow Front, Airflow Middle
+        // Sidepods (6): Drag Reduction, Low Speed, Med Speed, High Speed, Airflow Sensitivity
         6: {
-            0: 0,    // Airflow Front
-            4: 0,    // Drag Reduction
-            5: 1,    // Engine Cooling
-            13: 1,   // Airflow Middle
-            15: 0    // Lifespan
-        },
-        // Underfloor (7): Drag Reduction, Low Speed, Med Speed, High Speed, Airflow Sensitivity
-        7: {
             1: 0,    // Airflow Sensitivity
             4: 0,    // Drag Reduction
             7: 1,    // Low Speed
             8: 1,    // Medium Speed
             9: 1,    // High Speed
+            15: 0    // Lifespan
+        },
+        // Underfloor (7): Drag Reduction, Engine Cooling, Airflow Front, Airflow Middle
+        7: {
+            0: 0,    // Airflow Front
+            4: 0,    // Drag Reduction
+            5: 1,    // Engine Cooling
+            13: 1,   // Airflow Middle
             15: 0    // Lifespan
         },
         // Suspension (8): Drag Reduction, Low Speed, Med Speed, High Speed, Brake Cooling, Airflow Front
