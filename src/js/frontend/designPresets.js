@@ -12,7 +12,7 @@ let cachedData = null;
 const statPrettyNames = {
     0: "Airflow Front",
     1: "Airflow Sensitivity",
-    2: "Brake Cooling",
+    2: "Tyre Preservation",
     3: "DRS Delta",
     4: "Drag Reduction",
     5: "Engine Cooling",

@@ -1811,10 +1811,10 @@ export function ensureNerobaxPreset() {
     if (exists) return;
 
     addDesignFocusPreset('Nerobax', {
-        // Chassis (3): DRS Delta, Drag Reduction, Engine Cooling, Airflow Middle
+        // Chassis (3): Drag Reduction, DRS Delta, Engine Cooling, Airflow Middle
         3: {
-            3: 1,    // DRS Delta
-            4: 0,    // Drag Reduction
+            4: 1,    // Drag Reduction
+            3: 0,    // DRS Delta
             5: 0,    // Engine Cooling
             13: 1,   // Airflow Middle
             15: 0    // Lifespan
@@ -1829,14 +1829,14 @@ export function ensureNerobaxPreset() {
             9: 0,    // High Speed
             15: 0    // Lifespan
         },
-        // Rear Wing (5): Airflow Sensitivity, DRS Delta, Drag Reduction, Low Speed, Med Speed, High Speed
+        // Rear Wing (5): Drag Reduction, DRS Delta, Low Speed, Med Speed, High Speed, Airflow Sensitivity
         5: {
-            1: 1,    // Airflow Sensitivity
+            4: 1,    // Drag Reduction
             3: 1,    // DRS Delta
-            4: 0,    // Drag Reduction
-            7: 1,    // Low Speed
-            8: 0,    // Medium Speed
+            7: 0,    // Low Speed
+            8: 1,    // Medium Speed
             9: 0,    // High Speed
+            1: 0,    // Airflow Sensitivity
             15: 0    // Lifespan
         },
         // Sidepods (6): Drag Reduction, Engine Cooling, Airflow Front, Airflow Middle
