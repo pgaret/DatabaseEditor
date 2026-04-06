@@ -684,6 +684,7 @@ var messageHandlers = {
     "Save loaded succesfully": (message) => {
         isSaveSelected = 1;
         viewerLoaded = false;
+        downloadSaveButton.classList.remove("hidden");
         remove_drivers();
         removeStatsDrivers();
         listenersStaffGroups();
