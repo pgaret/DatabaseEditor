@@ -1829,6 +1829,16 @@ export function ensureNerobaxPreset() {
             9: 0.3,   // High Speed
             15: 0.25  // Lifespan
         },
+        // Rear Wing (5)
+        5: {
+            1: 0.25,  // Airflow Sensitivity
+            3: 0.9,   // DRS Delta
+            4: 0.85,  // Drag Reduction
+            7: 0.4,   // Low Speed
+            8: 0.4,   // Medium Speed
+            9: 0.4,   // High Speed
+            15: 0.25  // Lifespan
+        },
         // Sidepods (6)
         6: {
             0: 0.15,  // Airflow Front
