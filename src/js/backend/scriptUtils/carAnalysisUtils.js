@@ -1798,3 +1798,64 @@ export function addDesignFocusPreset(name, partsData) {
     return newId;
 }
 
+/**
+ * Ensures the "Nerobax" design focus preset exists in the save file.
+ * Slider positions read from in-game Design Focus UI.
+ */
+export function ensureNerobaxPreset() {
+    const exists = queryDB(
+        `SELECT Value FROM Parts_Enum_EmphasisPresets WHERE Name = 'Nerobax'`,
+        [],
+        'singleValue'
+    );
+    if (exists) return;
+
+    addDesignFocusPreset('Nerobax', {
+        // Chassis (3)
+        3: {
+            3: 0.5,   // DRS Delta (not visible in game UI, balanced)
+            4: 0.15,  // Drag Reduction
+            5: 0.8,   // Engine Cooling
+            13: 0.95, // Airflow Middle
+            15: 0.25  // Lifespan
+        },
+        // Front Wing (4)
+        4: {
+            0: 0.85,  // Airflow Front
+            1: 0.15,  // Airflow Sensitivity
+            2: 0.2,   // Brake Cooling
+            7: 0.75,  // Low Speed
+            8: 0.8,   // Medium Speed
+            9: 0.3,   // High Speed
+            15: 0.25  // Lifespan
+        },
+        // Sidepods (6)
+        6: {
+            0: 0.15,  // Airflow Front
+            4: 0.15,  // Drag Reduction
+            5: 0.85,  // Engine Cooling
+            13: 0.95, // Airflow Middle
+            15: 0.25  // Lifespan
+        },
+        // Underfloor (7)
+        7: {
+            1: 0.8,   // Airflow Sensitivity
+            4: 0.25,  // Drag Reduction
+            7: 0.65,  // Low Speed
+            8: 0.65,  // Medium Speed
+            9: 0.55,  // High Speed
+            15: 0.25  // Lifespan
+        },
+        // Suspension (8)
+        8: {
+            0: 0.8,   // Airflow Front
+            2: 0.8,   // Brake Cooling
+            4: 0.25,  // Drag Reduction
+            7: 0.7,   // Low Speed
+            8: 0.35,  // Medium Speed
+            9: 0.35,  // High Speed
+            15: 0.25  // Lifespan
+        }
+    });
+}
+
