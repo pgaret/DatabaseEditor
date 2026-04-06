@@ -1810,61 +1810,72 @@ export function ensureNerobaxPreset() {
     );
     if (exists) return;
 
+    // Rear Wing as separate preset "Nerobax-2"
+    const exists2 = queryDB(
+        `SELECT Value FROM Parts_Enum_EmphasisPresets WHERE Name = 'Nerobax-2'`,
+        [],
+        'singleValue'
+    );
+    if (!exists2) {
+        addDesignFocusPreset('Nerobax-2', {
+            // Rear Wing (5): Airflow Sensitivity, DRS Delta, Drag Reduction, Low Speed, Med Speed, High Speed
+            5: {
+                1: 0.25,  // Airflow Sensitivity
+                3: 0.9,   // DRS Delta
+                4: 0.85,  // Drag Reduction
+                7: 0.4,   // Low Speed
+                8: 0.4,   // Medium Speed
+                9: 0.4,   // High Speed
+                15: 0     // Lifespan
+            }
+        });
+    }
+
     addDesignFocusPreset('Nerobax', {
-        // Chassis (3)
+        // Chassis (3): DRS Delta, Drag Reduction, Engine Cooling, Airflow Middle
         3: {
-            3: 0.5,   // DRS Delta (not visible in game UI, balanced)
-            4: 0.15,  // Drag Reduction
-            5: 0.8,   // Engine Cooling
-            13: 0.95, // Airflow Middle
-            15: 0.25  // Lifespan
+            3: 1,    // DRS Delta
+            4: 0,    // Drag Reduction
+            5: 0,    // Engine Cooling
+            13: 1,   // Airflow Middle
+            15: 0    // Lifespan
         },
-        // Front Wing (4)
+        // Front Wing (4): Low Speed, Med Speed, High Speed, Brake Cooling, Airflow Sensitivity, Airflow Front
         4: {
-            0: 0.85,  // Airflow Front
-            1: 0.15,  // Airflow Sensitivity
-            2: 0.2,   // Brake Cooling
-            7: 0.75,  // Low Speed
-            8: 0.8,   // Medium Speed
-            9: 0.3,   // High Speed
-            15: 0.25  // Lifespan
+            0: 1,    // Airflow Front
+            1: 0,    // Airflow Sensitivity
+            2: 0,    // Brake Cooling
+            7: 1,    // Low Speed
+            8: 0,    // Medium Speed
+            9: 0,    // High Speed
+            15: 0    // Lifespan
         },
-        // Rear Wing (5)
-        5: {
-            1: 0.25,  // Airflow Sensitivity
-            3: 0.9,   // DRS Delta
-            4: 0.85,  // Drag Reduction
-            7: 0.4,   // Low Speed
-            8: 0.4,   // Medium Speed
-            9: 0.4,   // High Speed
-            15: 0.25  // Lifespan
-        },
-        // Sidepods (6)
+        // Sidepods (6): Drag Reduction, Engine Cooling, Airflow Front, Airflow Middle
         6: {
-            0: 0.15,  // Airflow Front
-            4: 0.15,  // Drag Reduction
-            5: 0.85,  // Engine Cooling
-            13: 0.95, // Airflow Middle
-            15: 0.25  // Lifespan
+            0: 0,    // Airflow Front
+            4: 0,    // Drag Reduction
+            5: 1,    // Engine Cooling
+            13: 1,   // Airflow Middle
+            15: 0    // Lifespan
         },
-        // Underfloor (7)
+        // Underfloor (7): Drag Reduction, Low Speed, Med Speed, High Speed, Airflow Sensitivity
         7: {
-            1: 0.8,   // Airflow Sensitivity
-            4: 0.25,  // Drag Reduction
-            7: 0.65,  // Low Speed
-            8: 0.65,  // Medium Speed
-            9: 0.55,  // High Speed
-            15: 0.25  // Lifespan
+            1: 0,    // Airflow Sensitivity
+            4: 0,    // Drag Reduction
+            7: 1,    // Low Speed
+            8: 1,    // Medium Speed
+            9: 1,    // High Speed
+            15: 0    // Lifespan
         },
-        // Suspension (8)
+        // Suspension (8): Drag Reduction, Low Speed, Med Speed, High Speed, Brake Cooling, Airflow Front
         8: {
-            0: 0.8,   // Airflow Front
-            2: 0.8,   // Brake Cooling
-            4: 0.25,  // Drag Reduction
-            7: 0.7,   // Low Speed
-            8: 0.35,  // Medium Speed
-            9: 0.35,  // High Speed
-            15: 0.25  // Lifespan
+            0: 0,    // Airflow Front
+            2: 1,    // Brake Cooling
+            4: 1,    // Drag Reduction
+            7: 0,    // Low Speed
+            8: 0,    // Medium Speed
+            9: 0,    // High Speed
+            15: 0    // Lifespan
         }
     });
 }
