@@ -1800,7 +1800,7 @@ export function addDesignFocusPreset(name, partsData) {
 
 /**
  * Ensures the "Nerobax" design focus preset exists in the save file.
- * Slider positions read from in-game Design Focus UI.
+ * Inserts at Value 1 (front of list) by shifting existing presets up.
  */
 export function ensureNerobaxPreset() {
     const exists = queryDB(
@@ -1808,9 +1808,20 @@ export function ensureNerobaxPreset() {
         [],
         'singleValue'
     );
-    if (exists) return;
+    if (exists != null) return;
 
-    addDesignFocusPreset('Nerobax', {
+    // Shift all existing preset IDs >= 1 up by 1 to make room at position 1.
+    // Process in descending order to avoid unique constraint conflicts.
+    const maxVal = queryDB(`SELECT MAX(Value) FROM Parts_Enum_EmphasisPresets`, [], 'singleValue') || 0;
+    for (let v = maxVal; v >= 1; v--) {
+        queryDB(`UPDATE Parts_Enum_EmphasisPresets SET Value = ? WHERE Value = ?`, [v + 1, v], 'run');
+        queryDB(`UPDATE Parts_DesignFocusPresets SET Preset = ? WHERE Preset = ?`, [v + 1, v], 'run');
+    }
+
+    // Insert Nerobax at Value 1
+    queryDB(`INSERT INTO Parts_Enum_EmphasisPresets (Value, Name) VALUES (1, 'Nerobax')`, [], 'run');
+
+    const nerobaxData = {
         // Chassis (3): Drag Reduction, DRS Delta, Engine Cooling, Airflow Middle
         3: {
             4: 1,    // Drag Reduction
@@ -1866,6 +1877,17 @@ export function ensureNerobaxPreset() {
             9: 0,    // High Speed
             15: 0    // Lifespan
         }
-    });
+    };
+
+    for (const partType of Object.keys(nerobaxData)) {
+        const stats = nerobaxData[partType];
+        for (const partStat of Object.keys(stats)) {
+            queryDB(
+                `INSERT INTO Parts_DesignFocusPresets (Preset, PartType, PartStat, DesignFocus) VALUES (1, ?, ?, ?)`,
+                [Number(partType), Number(partStat), stats[partStat]],
+                'run'
+            );
+        }
+    }
 }
 
