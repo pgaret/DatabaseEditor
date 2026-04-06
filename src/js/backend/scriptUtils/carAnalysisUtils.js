@@ -1810,27 +1810,6 @@ export function ensureNerobaxPreset() {
     );
     if (exists) return;
 
-    // Rear Wing as separate preset "Nerobax-2"
-    const exists2 = queryDB(
-        `SELECT Value FROM Parts_Enum_EmphasisPresets WHERE Name = 'Nerobax-2'`,
-        [],
-        'singleValue'
-    );
-    if (!exists2) {
-        addDesignFocusPreset('Nerobax-2', {
-            // Rear Wing (5): Airflow Sensitivity, DRS Delta, Drag Reduction, Low Speed, Med Speed, High Speed
-            5: {
-                1: 0.25,  // Airflow Sensitivity
-                3: 0.9,   // DRS Delta
-                4: 0.85,  // Drag Reduction
-                7: 0.4,   // Low Speed
-                8: 0.4,   // Medium Speed
-                9: 0.4,   // High Speed
-                15: 0     // Lifespan
-            }
-        });
-    }
-
     addDesignFocusPreset('Nerobax', {
         // Chassis (3): DRS Delta, Drag Reduction, Engine Cooling, Airflow Middle
         3: {
@@ -1845,6 +1824,16 @@ export function ensureNerobaxPreset() {
             0: 1,    // Airflow Front
             1: 0,    // Airflow Sensitivity
             2: 0,    // Brake Cooling
+            7: 1,    // Low Speed
+            8: 0,    // Medium Speed
+            9: 0,    // High Speed
+            15: 0    // Lifespan
+        },
+        // Rear Wing (5): Airflow Sensitivity, DRS Delta, Drag Reduction, Low Speed, Med Speed, High Speed
+        5: {
+            1: 1,    // Airflow Sensitivity
+            3: 1,    // DRS Delta
+            4: 0,    // Drag Reduction
             7: 1,    // Low Speed
             8: 0,    // Medium Speed
             9: 0,    // High Speed
