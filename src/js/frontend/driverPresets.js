@@ -47,6 +47,18 @@ const STAT_LABELS_FULL = {
     improvability: "Improvability", aggression: "Aggression", marketability: "Marketability"
 };
 
+const STAT_DESCRIPTIONS = {
+    cornering:    "The ability to maintain speed through corners. Allows the driver to go faster through all corners to improve lap times and reduces the chance of running wide or spinning.",
+    braking:      "The ability to brake more efficiently. Allows drivers to brake later when approaching corners to improve lap times without running wide or causing incidents.",
+    control:      "The ability to prevent racing incidents. Reduces the likelihood of lock-ups, spins, crashes, or running wide.",
+    smoothness:   "The ability to reduce tire wear while racing. Allows a driver to push harder and run longer stints on each set of tires.",
+    adaptability: "The ability to adapt to poor weather on track. Improves the driver's acceleration and cornering speed on tires not suited to wetter track levels.",
+    overtaking:   "The ability to overtake other drivers. Allows more overtake attempts and successful completions, and lowers the chance of causing a racing incident when doing so.",
+    defending:    "The ability to defend a position while racing. Reduces the chance that another driver will be able to successfully overtake.",
+    reactions:    "The ability to respond to events at high speeds. Allows the driver to accelerate faster out of corners and pull away faster when the lights go out at the race start.",
+    accuracy:     "The ability to follow the racing line as accurately as possible. Reduces the chance of a driver losing time or their car taking damage from running wide.",
+};
+
 // DB values as fetched (untouched reference)
 let dbDrivers = [];
 // Effective values shown in table = DB + committed overrides + session edits
@@ -132,7 +144,8 @@ function renderHeader() {
         const th = document.createElement("th");
         th.className = "driver-presets-col-stat sortable";
         th.textContent = col.label;
-        th.title = STAT_LABELS_FULL[col.key];
+        const desc = STAT_DESCRIPTIONS[col.key];
+        th.title = desc ? `${STAT_LABELS_FULL[col.key]}: ${desc}` : STAT_LABELS_FULL[col.key];
         th.dataset.sortKey = col.key;
         if (sortKey === col.key) th.classList.add(sortDir > 0 ? "sort-asc" : "sort-desc");
         row.appendChild(th);
