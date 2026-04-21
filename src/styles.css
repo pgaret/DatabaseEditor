@@ -20508,6 +20508,16 @@ p.news-error-api-key {
   opacity: 0.85;
 }
 
+.driver-presets-action-btn.active {
+  background: #00d2d3;
+  color: #111;
+  border-color: #00d2d3;
+}
+
+.driver-presets-action-btn.active:hover {
+  opacity: 0.85;
+}
+
 .driver-presets-table-wrap {
   overflow: auto;
   flex: 1 1 auto;
