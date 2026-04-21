@@ -11,6 +11,7 @@ const pageSizeEl = document.getElementById("driverPresetsPageSize");
 const pagePrevEl = document.getElementById("driverPresetsPagePrev");
 const pageNextEl = document.getElementById("driverPresetsPageNext");
 const pageInfoEl = document.getElementById("driverPresetsPageInfo");
+const overridesFilterBtn = document.getElementById("driverPresetsOverridesFilter");
 
 const STAT_COLUMNS = [
     { key: "cornering",     label: "Cor" },
@@ -68,6 +69,7 @@ let sessionEdits = new Map();
 let sortKey = "avg";
 let sortDir = -1; // 1 asc, -1 desc
 let searchTerm = "";
+let overridesOnly = false;
 let dataLoaded = false;
 let pageSize = 50;
 let pageIndex = 0;
@@ -158,8 +160,9 @@ function renderBody() {
     tbodyEl.innerHTML = "";
 
     const filtered = dbDrivers.filter(d => {
-        if (!searchTerm) return true;
-        return d.name.toLowerCase().includes(searchTerm);
+        if (searchTerm && !d.name.toLowerCase().includes(searchTerm)) return false;
+        if (overridesOnly && !driverStatOverrides[d.name]) return false;
+        return true;
     });
 
     filtered.sort((a, b) => {
@@ -316,6 +319,15 @@ tbodyEl.addEventListener("change", (e) => {
 if (searchEl) {
     searchEl.addEventListener("input", () => {
         searchTerm = searchEl.value.trim().toLowerCase();
+        pageIndex = 0;
+        renderBody();
+    });
+}
+
+if (overridesFilterBtn) {
+    overridesFilterBtn.addEventListener("click", () => {
+        overridesOnly = !overridesOnly;
+        overridesFilterBtn.classList.toggle("active", overridesOnly);
         pageIndex = 0;
         renderBody();
     });
