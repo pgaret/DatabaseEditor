@@ -18,7 +18,7 @@ import { getPerformanceAllTeamsSeason, getAttributesAllTeams, getPerformanceAllC
 import { setDatabase, getMetadata, getDatabase } from "./dbManager";
 import { fetchHead2Head, fetchHead2HeadTeam } from "./scriptUtils/head2head";
 import { editTeam, fetchTeamData } from "./scriptUtils/editTeamUtils";
-import { overwritePerformanceTeam, updateItemsForDesignDict, fitLoadoutsDict, getPartsFromTeam, getUnitValueFromParts, getAllPartsFromTeam, getMaxDesign, getUnitValueFromOnePart, deleteCustomEngineAndReassign, getTeamExpertise, updateTeamExpertise, getDesignFocusPresets, addDesignFocusPreset, ensureNerobaxPreset } from "./scriptUtils/carAnalysisUtils";
+import { overwritePerformanceTeam, updateItemsForDesignDict, fitLoadoutsDict, getPartsFromTeam, getUnitValueFromParts, getAllPartsFromTeam, getMaxDesign, getUnitValueFromOnePart, deleteCustomEngineAndReassign, getTeamExpertise, updateTeamExpertise, getDesignFocusPresets, addDesignFocusPreset, applyNerobaxToBalanced } from "./scriptUtils/carAnalysisUtils";
 import { setGlobals, getGlobals } from "./commandGlobals";
 import { editAge, editMarketability, editName, editRetirement, editSuperlicense, editCode, editMentality, editStats, setAllDriversStatsTo85 } from "./scriptUtils/eidtStatsUtils";
 import { editCalendar, fetchCalendar } from "./scriptUtils/calendarUtils";
@@ -106,7 +106,7 @@ const workerCommands = {
     postMessage({ responseMessage: "Game Year", content: yearData });
 
     checkCustomTables(yearData[0]);
-    ensureNerobaxPreset();
+    applyNerobaxToBalanced();
 
     if (yearData[1] !== null) {
       setGlobals({ createTeam: true });

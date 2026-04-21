@@ -1799,27 +1799,43 @@ export function addDesignFocusPreset(name, partsData) {
 }
 
 /**
- * Ensures the "Nerobax" design focus preset exists in the save file.
- * Inserts at Value 1 (front of list) by shifting existing presets up.
+ * Overwrites the "Balanced" preset's slider values with the Nerobax recipe.
+ * Idempotent — tracked via Custom_Save_Config so user edits to Balanced stick
+ * on subsequent loads. Also migrates saves from the prior version that inserted
+ * Nerobax as its own preset at Value 1.
  */
-export function ensureNerobaxPreset() {
-    const exists = queryDB(
+export function applyNerobaxToBalanced() {
+    const alreadyApplied = queryDB(
+        `SELECT value FROM Custom_Save_Config WHERE key = 'nerobaxBalancedApplied'`,
+        [],
+        'singleValue'
+    );
+    if (alreadyApplied === '1') return;
+
+    // Migrate away from the previous scheme (Nerobax as its own preset).
+    const oldNerobaxValue = queryDB(
         `SELECT Value FROM Parts_Enum_EmphasisPresets WHERE Name = 'Nerobax'`,
         [],
         'singleValue'
     );
-    if (exists != null) return;
-
-    // Shift all existing preset IDs >= 1 up by 1 to make room at position 1.
-    // Process in descending order to avoid unique constraint conflicts.
-    const maxVal = queryDB(`SELECT MAX(Value) FROM Parts_Enum_EmphasisPresets`, [], 'singleValue') || 0;
-    for (let v = maxVal; v >= 1; v--) {
-        queryDB(`UPDATE Parts_Enum_EmphasisPresets SET Value = ? WHERE Value = ?`, [v + 1, v], 'run');
-        queryDB(`UPDATE Parts_DesignFocusPresets SET Preset = ? WHERE Preset = ?`, [v + 1, v], 'run');
+    if (oldNerobaxValue != null) {
+        queryDB(`DELETE FROM Parts_DesignFocusPresets WHERE Preset = ?`, [oldNerobaxValue], 'run');
+        queryDB(`DELETE FROM Parts_Enum_EmphasisPresets WHERE Value = ?`, [oldNerobaxValue], 'run');
+        const maxVal = queryDB(`SELECT MAX(Value) FROM Parts_Enum_EmphasisPresets`, [], 'singleValue') || 0;
+        for (let v = oldNerobaxValue + 1; v <= maxVal; v++) {
+            queryDB(`UPDATE Parts_Enum_EmphasisPresets SET Value = ? WHERE Value = ?`, [v - 1, v], 'run');
+            queryDB(`UPDATE Parts_DesignFocusPresets SET Preset = ? WHERE Preset = ?`, [v - 1, v], 'run');
+        }
     }
 
-    // Insert Nerobax at Value 1
-    queryDB(`INSERT INTO Parts_Enum_EmphasisPresets (Value, Name) VALUES (1, 'Nerobax')`, [], 'run');
+    const balancedId = queryDB(
+        `SELECT Value FROM Parts_Enum_EmphasisPresets WHERE Name = 'Balanced'`,
+        [],
+        'singleValue'
+    );
+    if (balancedId == null) return;
+
+    queryDB(`DELETE FROM Parts_DesignFocusPresets WHERE Preset = ?`, [balancedId], 'run');
 
     const nerobaxData = {
         // Chassis (3): Drag Reduction, DRS Delta, Engine Cooling, Airflow Middle
@@ -1883,11 +1899,17 @@ export function ensureNerobaxPreset() {
         const stats = nerobaxData[partType];
         for (const partStat of Object.keys(stats)) {
             queryDB(
-                `INSERT INTO Parts_DesignFocusPresets (Preset, PartType, PartStat, DesignFocus) VALUES (1, ?, ?, ?)`,
-                [Number(partType), Number(partStat), stats[partStat]],
+                `INSERT INTO Parts_DesignFocusPresets (Preset, PartType, PartStat, DesignFocus) VALUES (?, ?, ?, ?)`,
+                [balancedId, Number(partType), Number(partStat), stats[partStat]],
                 'run'
             );
         }
     }
+
+    queryDB(
+        `INSERT OR REPLACE INTO Custom_Save_Config (key, value) VALUES ('nerobaxBalancedApplied', '1')`,
+        [],
+        'run'
+    );
 }
 
