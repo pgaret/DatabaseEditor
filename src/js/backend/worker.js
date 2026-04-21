@@ -18,7 +18,7 @@ import { getPerformanceAllTeamsSeason, getAttributesAllTeams, getPerformanceAllC
 import { setDatabase, getMetadata, getDatabase } from "./dbManager";
 import { fetchHead2Head, fetchHead2HeadTeam } from "./scriptUtils/head2head";
 import { editTeam, fetchTeamData } from "./scriptUtils/editTeamUtils";
-import { overwritePerformanceTeam, updateItemsForDesignDict, fitLoadoutsDict, getPartsFromTeam, getUnitValueFromParts, getAllPartsFromTeam, getMaxDesign, getUnitValueFromOnePart, deleteCustomEngineAndReassign, getTeamExpertise, updateTeamExpertise, getDesignFocusPresets, addDesignFocusPreset, ensureNerobaxPreset } from "./scriptUtils/carAnalysisUtils";
+import { overwritePerformanceTeam, updateItemsForDesignDict, fitLoadoutsDict, getPartsFromTeam, getUnitValueFromParts, getAllPartsFromTeam, getMaxDesign, getUnitValueFromOnePart, deleteCustomEngineAndReassign, getTeamExpertise, updateTeamExpertise, getDesignFocusPresets, ensureNerobaxPreset } from "./scriptUtils/carAnalysisUtils";
 import { setGlobals, getGlobals } from "./commandGlobals";
 import { editAge, editMarketability, editName, editRetirement, editSuperlicense, editCode, editMentality, editStats, setAllDriversStatsTo85 } from "./scriptUtils/eidtStatsUtils";
 import { editCalendar, fetchCalendar } from "./scriptUtils/calendarUtils";
@@ -42,6 +42,7 @@ import { analyzeFileToDatabase, repack } from "./UESaveHandler";
 import { fetchRegulationsData, updateRegulations } from "./scriptUtils/regulationsUtils.js";
 import { deleteProblematicTriggers } from "./scriptUtils/triggerUtils.js";
 import { fetchCountryLocaleForCode, fetchRandomDraftForename, fetchRandomStaffDraft } from "./scriptUtils/createStaffUtils.js";
+import { fetchDriverPresetData, applyDriverStatOverrides } from "./scriptUtils/driverPresetUtils.js";
 
 import initSqlJs from 'sql.js';
 import { combined_dict } from "../frontend/config";
@@ -442,16 +443,35 @@ const workerCommands = {
     const presets = getDesignFocusPresets();
     postMessage({ responseMessage: "Design presets fetched", content: presets });
   },
-  addDesignPreset: (data, postMessage) => {
-    addDesignFocusPreset(data.name, data.parts);
+  applySliderPresets: (data, postMessage) => {
+    ensureNerobaxPreset();
     postMessage({
-      responseMessage: "Design preset added",
-      noti_msg: `Added preset "${data.name}"`,
+      responseMessage: "Slider presets applied",
+      noti_msg: "Slider presets applied to save",
       isEditCommand: true,
       unlocksDownload: true
     });
     const presets = getDesignFocusPresets();
     postMessage({ responseMessage: "Design presets fetched", content: presets });
+  },
+  driverPresetDataRequest: (data, postMessage) => {
+    const drivers = fetchDriverPresetData();
+    postMessage({ responseMessage: "Driver preset data fetched", content: drivers });
+  },
+  applyDriverStatOverrides: (data, postMessage) => {
+    const result = applyDriverStatOverrides(data?.overrides || {});
+    const applied = result.applied;
+    const skipped = result.skipped.length;
+    const parts = [`Applied stats to ${applied} driver${applied === 1 ? "" : "s"}`];
+    if (skipped) parts.push(`${skipped} not found in save`);
+    postMessage({
+      responseMessage: "Driver overrides applied",
+      noti_msg: parts.join(" — "),
+      isEditCommand: true,
+      unlocksDownload: true
+    });
+    const drivers = fetchDriverPresetData();
+    postMessage({ responseMessage: "Driver preset data fetched", content: drivers });
   },
   editEngine: (data, postMessage) => {
     snapshotEnginePowerProgression(Object.keys(data?.engines || {}), 'pre_engine_edit');

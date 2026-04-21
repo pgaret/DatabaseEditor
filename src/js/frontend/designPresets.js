@@ -1,13 +1,13 @@
 import { Command } from "../backend/command.js";
 import { part_full_names } from "./config";
-import { confirmModal } from "./renderer";
+import { request_driver_presets, apply_driver_presets } from "./driverPresets.js";
 
 const presetsExisting = document.getElementById("presetsExisting");
-const presetsSliders = document.getElementById("presetsSliders");
-const presetAddBtn = document.getElementById("presetAddBtn");
-const presetNameInput = document.getElementById("presetNameInput");
-
-let cachedData = null;
+const presetsSubtabs = document.getElementById("presetsSubtabs");
+const presetsSlidersSection = document.getElementById("presetsSlidersSection");
+const presetsDriversSection = document.getElementById("presetsDriversSection");
+const applySliderPresetsBtn = document.getElementById("applySliderPresetsBtn");
+const applyDriverPresetsBtn = document.getElementById("applyDriverPresetsBtn");
 
 const statPrettyNames = {
     0: "Airflow Front",
@@ -23,32 +23,8 @@ const statPrettyNames = {
     15: "Minimum Lifespan"
 };
 
-// Category grouping matching the in-game design focus UI
-const statCategories = {
-    "Velocity":   [3, 4],
-    "Downforce":  [7, 8, 9],
-    "Cooling":    [2, 5],
-    "Airflow":    [0, 1, 13],
-    "Durability": [15]
-};
-
-// Which stats each part type actually has (mirrors defaultPartsStats from carConstants)
-// Order matches the game UI: Velocity → Downforce → Cooling → Airflow → Durability
-function getGroupedStats(partStats) {
-    const groups = [];
-    for (const [category, statIds] of Object.entries(statCategories)) {
-        const matching = statIds.filter(s => partStats.includes(s));
-        if (matching.length > 0) {
-            groups.push({ category, stats: matching });
-        }
-    }
-    return groups;
-}
-
 export function load_design_presets(data) {
-    cachedData = data;
     renderPresetsTables(data);
-    renderAddForm(data);
 }
 
 function renderPresetsTables(data) {
@@ -141,107 +117,33 @@ function formatPresetName(name) {
     return name.replace(/([A-Z])/g, " $1").trim();
 }
 
-function renderAddForm(data) {
-    const { defaultPartsStats } = data;
-    presetsSliders.innerHTML = "";
+if (presetsSubtabs) {
+    presetsSubtabs.addEventListener("click", (e) => {
+        const tab = e.target.closest("a.nav-link[data-preset-mode]");
+        if (!tab) return;
+        e.preventDefault();
+        const mode = tab.dataset.presetMode;
+        presetsSubtabs.querySelectorAll("a.nav-link[data-preset-mode]").forEach(t => {
+            t.classList.toggle("active", t === tab);
+        });
+        presetsSlidersSection.classList.toggle("hide", mode !== "sliders");
+        presetsDriversSection.classList.toggle("hide", mode !== "drivers");
 
-    const partTypes = Object.keys(defaultPartsStats).map(Number).sort((a, b) => a - b);
-
-    for (const partType of partTypes) {
-        const partName = part_full_names[partType] || `Part ${partType}`;
-        const partStats = defaultPartsStats[partType];
-        const groups = getGroupedStats(partStats);
-
-        const section = document.createElement("div");
-        section.className = "preset-part-section";
-        section.dataset.partType = partType;
-
-        const partHeader = document.createElement("div");
-        partHeader.className = "preset-part-header";
-
-        const partTitle = document.createElement("div");
-        partTitle.className = "bold-font preset-part-title";
-        partTitle.textContent = partName;
-        partHeader.appendChild(partTitle);
-
-        section.appendChild(partHeader);
-
-        for (const group of groups) {
-            const catLabel = document.createElement("div");
-            catLabel.className = "preset-category-label bold-font";
-            catLabel.textContent = group.category;
-            section.appendChild(catLabel);
-
-            for (const stat of group.stats) {
-                const sliderRow = document.createElement("div");
-                sliderRow.className = "preset-slider-row";
-
-                const label = document.createElement("label");
-                label.className = "preset-slider-label";
-                label.textContent = statPrettyNames[stat] || `Stat ${stat}`;
-
-                const trackWrap = document.createElement("div");
-                trackWrap.className = "preset-slider-track-wrap";
-
-                const range = document.createElement("input");
-                range.type = "range";
-                range.min = "0";
-                range.max = "1";
-                range.step = "0.05";
-                range.value = "0.5";
-                range.className = "preset-slider";
-                range.dataset.partType = partType;
-                range.dataset.partStat = stat;
-
-                const valDisplay = document.createElement("span");
-                valDisplay.className = "preset-slider-value";
-                valDisplay.textContent = "50%";
-
-                range.addEventListener("input", () => {
-                    valDisplay.textContent = Math.round(range.value * 100) + "%";
-                });
-
-                trackWrap.appendChild(range);
-
-                sliderRow.appendChild(label);
-                sliderRow.appendChild(trackWrap);
-                sliderRow.appendChild(valDisplay);
-                section.appendChild(sliderRow);
-            }
+        if (mode === "drivers") {
+            request_driver_presets();
         }
-
-        presetsSliders.appendChild(section);
-    }
+    });
 }
 
-function collectFormData() {
-    const name = presetNameInput.value.trim();
-    if (!name) return null;
-
-    const parts = {};
-    presetsSliders.querySelectorAll(".preset-slider").forEach(slider => {
-        const partType = slider.dataset.partType;
-        const partStat = slider.dataset.partStat;
-        if (!parts[partType]) parts[partType] = {};
-        parts[partType][partStat] = parseFloat(slider.value);
+if (applySliderPresetsBtn) {
+    applySliderPresetsBtn.addEventListener("click", () => {
+        const cmd = new Command("applySliderPresets", {});
+        cmd.execute();
     });
-
-    return { name, parts };
 }
 
-presetAddBtn.addEventListener("click", () => {
-    const formData = collectFormData();
-    if (!formData) {
-        confirmModal("Please enter a preset name.");
-        return;
-    }
-
-    const cmd = new Command("addDesignPreset", formData);
-    cmd.execute();
-
-    presetNameInput.value = "";
-    presetsSliders.querySelectorAll(".preset-slider").forEach(slider => {
-        slider.value = "0.5";
-        slider.nextElementSibling.textContent = "50%";
+if (applyDriverPresetsBtn) {
+    applyDriverPresetsBtn.addEventListener("click", () => {
+        apply_driver_presets();
     });
-});
+}

@@ -43,6 +43,7 @@ import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { getRecentHandles, saveHandleToRecents, removeRecentHandle } from './recentsManager.js';
 import { initSeasonMods, syncAduoTpToggles, syncMods2025Dependencies, syncMods2026Dependencies, syncMods2026ApplyAllButtonState, updateMod2025Blocking, updateMod2026Blocking } from './seasonMods.js';
 import { load_design_presets } from './designPresets.js';
+import { load_driver_presets, request_driver_presets } from './driverPresets.js';
 
 
 
@@ -859,6 +860,9 @@ var messageHandlers = {
     },
     "Design presets fetched": (message) => {
         load_design_presets(message);
+    },
+    "Driver preset data fetched": (message) => {
+        load_driver_presets(message);
     }
 };
 
