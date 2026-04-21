@@ -53,8 +53,8 @@ let dbDrivers = [];
 let effective = new Map(); // name -> { ...stats }
 // Session edits (name -> { key -> newValue }), only for cells the user changed this session
 let sessionEdits = new Map();
-let sortKey = "name";
-let sortDir = 1; // 1 asc, -1 desc
+let sortKey = "avg";
+let sortDir = -1; // 1 asc, -1 desc
 let searchTerm = "";
 let dataLoaded = false;
 let pageSize = 50;
