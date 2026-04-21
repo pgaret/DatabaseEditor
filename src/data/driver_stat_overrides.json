@@ -209,7 +209,7 @@
     "reactions": 85,
     "accuracy": 86
   },
-  "Théo Pourchaire": {
+  "Theo Pourchaire": {
     "cornering": 82,
     "braking": 79,
     "reactions": 83,
@@ -365,18 +365,6 @@
     "smoothness": 70,
     "improvability": 48
   },
-  "Marta García": {
-    "cornering": 72,
-    "braking": 70,
-    "reactions": 71,
-    "overtaking": 68,
-    "defending": 73,
-    "control": 74,
-    "accuracy": 72,
-    "adaptability": 70,
-    "smoothness": 73,
-    "improvability": 65
-  },
   "Bianca Bustamante": {
     "cornering": 70,
     "braking": 69,
@@ -437,7 +425,7 @@
     "smoothness": 58,
     "improvability": 56
   },
-  "Lena Bühler": {
+  "Lena Buhler": {
     "cornering": 57,
     "braking": 58,
     "reactions": 57,
@@ -460,18 +448,6 @@
     "adaptability": 56,
     "smoothness": 56,
     "improvability": 52
-  },
-  "Doriane Pin": {
-    "cornering": 55,
-    "braking": 53,
-    "reactions": 56,
-    "overtaking": 54,
-    "defending": 52,
-    "control": 53,
-    "accuracy": 54,
-    "adaptability": 55,
-    "smoothness": 52,
-    "improvability": 82
   },
   "Aurelia Nobels": {
     "cornering": 53,
