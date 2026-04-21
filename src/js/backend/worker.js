@@ -461,9 +461,14 @@ const workerCommands = {
   applyDriverStatOverrides: (data, postMessage) => {
     const result = applyDriverStatOverrides(data?.overrides || {});
     const applied = result.applied;
-    const skipped = result.skipped.length;
+    const skippedNames = result.skipped;
     const parts = [`Applied stats to ${applied} driver${applied === 1 ? "" : "s"}`];
-    if (skipped) parts.push(`${skipped} not found in save`);
+    if (skippedNames.length) {
+      const preview = skippedNames.slice(0, 4).join(", ");
+      const extra = skippedNames.length > 4 ? ` +${skippedNames.length - 4} more` : "";
+      parts.push(`not found: ${preview}${extra}`);
+      console.warn("[applyDriverStatOverrides] drivers not found in save:", skippedNames);
+    }
     postMessage({
       responseMessage: "Driver overrides applied",
       noti_msg: parts.join(" — "),
