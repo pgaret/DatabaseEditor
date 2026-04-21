@@ -5695,20 +5695,45 @@
       <div class="script-view hide unloaded" id="design_presets">
         <div class="general-top-panel">
           <div class="title-buttons-left">
-            <h5 class="bold-font" style="margin: 0; color: var(--text-general);">Design Focus Presets</h5>
+            <h5 class="bold-font" style="margin: 0; color: var(--text-general);">Presets</h5>
+          </div>
+          <div class="title-buttons-right">
+            <button type="button" class="btn btn-sm bold-font presets-apply-btn" id="applySliderPresetsBtn">Apply Slider Presets</button>
+            <button type="button" class="btn btn-sm bold-font presets-apply-btn primary" id="applyDriverPresetsBtn">Apply Driver Presets</button>
           </div>
         </div>
+        <div class="presets-subtabs" id="presetsSubtabs">
+          <ul class="nav nav-pills">
+            <li class="nav-item">
+              <a class="nav-link bold-font generalPills active" data-preset-mode="sliders" id="presetsTabSliders">
+                <div class="basic-label bold-font lineups-pill-label">Focus</div>
+                <div class="pill-line"></div>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link bold-font generalPills" data-preset-mode="drivers" id="presetsTabDrivers">
+                <div class="basic-label bold-font lineups-pill-label">Drivers</div>
+                <div class="pill-line"></div>
+              </a>
+            </li>
+          </ul>
+        </div>
         <div class="presets-content" id="presetsContent">
-          <div class="presets-existing" id="presetsExisting"></div>
-          <div class="presets-add-section" id="presetsAddSection">
-            <h6 class="bold-font" style="margin-top: 1rem;">Add New Preset</h6>
-            <div class="presets-add-form" id="presetsAddForm">
-              <div class="presets-name-row">
-                <label class="bold-font">Preset Name</label>
-                <input type="text" class="custom-input-number preset-name-input" id="presetNameInput" placeholder="e.g. MaxDownforce">
-              </div>
-              <div id="presetsSliders"></div>
-              <button class="btn btn-sm bold-font preset-add-btn" id="presetAddBtn">Add Preset</button>
+          <div class="presets-section" id="presetsSlidersSection" data-preset-mode="sliders">
+            <div class="presets-existing" id="presetsExisting"></div>
+          </div>
+          <div class="presets-section hide" id="presetsDriversSection" data-preset-mode="drivers">
+            <div class="driver-presets-toolbar">
+              <input type="text" class="custom-input-number driver-presets-search" id="driverPresetsSearch" placeholder="Search driver…">
+              <div class="driver-presets-toolbar-spacer"></div>
+              <span class="driver-presets-dirty-indicator" id="driverPresetsDirtyIndicator"></span>
+              <button type="button" class="btn btn-sm bold-font driver-presets-action-btn" id="driverPresetsExportBtn">Export Changes</button>
+            </div>
+            <div class="driver-presets-table-wrap">
+              <table class="driver-presets-table" id="driverPresetsTable">
+                <thead id="driverPresetsThead"></thead>
+                <tbody id="driverPresetsTbody"></tbody>
+              </table>
             </div>
           </div>
         </div>

@@ -1766,39 +1766,6 @@ export function getDesignFocusPresets() {
 }
 
 /**
- * Adds a new design focus preset to the save file.
- * @param {string} name - Display name for the preset
- * @param {Object} partsData - { [partType]: { [partStat]: focusValue } }
- */
-export function addDesignFocusPreset(name, partsData) {
-    const maxRow = queryDB(
-        `SELECT MAX(Value) FROM Parts_Enum_EmphasisPresets`,
-        [],
-        'singleValue'
-    );
-    const newId = (maxRow ?? 0) + 1;
-
-    queryDB(
-        `INSERT INTO Parts_Enum_EmphasisPresets (Value, Name) VALUES (?, ?)`,
-        [newId, name],
-        'run'
-    );
-
-    for (const partType of Object.keys(partsData)) {
-        const stats = partsData[partType];
-        for (const partStat of Object.keys(stats)) {
-            queryDB(
-                `INSERT INTO Parts_DesignFocusPresets (Preset, PartType, PartStat, DesignFocus) VALUES (?, ?, ?, ?)`,
-                [newId, Number(partType), Number(partStat), stats[partStat]],
-                'run'
-            );
-        }
-    }
-
-    return newId;
-}
-
-/**
  * Overwrites the "Balanced" preset's slider values with the Nerobax recipe.
  * Idempotent — tracked via Custom_Save_Config so user edits to Balanced stick
  * on subsequent loads. Also migrates saves from the prior version that inserted

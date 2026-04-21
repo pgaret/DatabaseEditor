@@ -20397,134 +20397,210 @@ p.news-error-api-key {
   color: color-mix(in srgb, var(--text-general) 70%, transparent);
 }
 
-/* Add preset form */
-.presets-add-section {
-  margin-top: 1.5rem;
-}
-
-.presets-add-section h6 {
-  color: var(--text-general);
-}
-
-.presets-add-form {
+/* Presets top-panel action buttons */
+.presets-apply-btn {
   background: var(--elements);
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.presets-name-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.presets-name-row label {
   color: var(--text-general);
+  border: 1px solid color-mix(in srgb, var(--text-general) 15%, transparent);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.preset-name-input {
-  max-width: 250px;
+.presets-apply-btn:hover {
+  border-color: #00d2d3;
 }
 
-.preset-part-section {
-  margin-bottom: 1.25rem;
-  padding-bottom: 1rem;
+.presets-apply-btn.primary {
+  background: #00d2d3;
+  color: #111;
+  border-color: #00d2d3;
+}
+
+.presets-apply-btn.primary:hover {
+  opacity: 0.85;
+}
+
+/* Presets sub-tabs */
+.presets-subtabs {
+  padding: 0 2rem;
   border-bottom: 1px solid color-mix(in srgb, var(--text-general) 10%, transparent);
 }
 
-.preset-part-header {
-  margin-bottom: 0.5rem;
+.presets-subtabs .nav-pills {
+  gap: 0.5rem;
 }
 
-.preset-part-title {
-  color: var(--text-general);
-  font-size: 0.95rem;
+.presets-drivers-placeholder {
+  padding: 2rem;
+  color: color-mix(in srgb, var(--text-general) 60%, transparent);
+  text-align: center;
 }
 
-.preset-category-label {
-  color: color-mix(in srgb, var(--text-general) 50%, transparent);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 0.6rem;
-  margin-bottom: 0.2rem;
-  padding-left: 2px;
-}
-
-.preset-slider-row {
+/* Driver presets table */
+.driver-presets-toolbar {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 3px 0;
+  gap: 0.6rem;
+  padding: 0 0 0.75rem;
 }
 
-.preset-slider-label {
-  color: var(--text-general);
-  font-size: 0.8rem;
-  min-width: 140px;
-}
-
-.preset-slider-track-wrap {
+.driver-presets-toolbar-spacer {
   flex: 1;
-  position: relative;
 }
 
-.preset-slider {
-  width: 100%;
-  height: 6px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: color-mix(in srgb, var(--text-general) 15%, transparent);
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
+.driver-presets-search {
+  max-width: 220px;
+  padding: 4px 10px;
 }
 
-.preset-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #00d2d3;
-  border: 2px solid var(--elements);
-  cursor: pointer;
-  box-shadow: 0 0 4px rgba(0, 210, 211, 0.4);
-}
-
-.preset-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #00d2d3;
-  border: 2px solid var(--elements);
-  cursor: pointer;
-}
-
-.preset-slider::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: 3px;
-}
-
-.preset-slider-value {
-  color: #00d2d3;
+.driver-presets-dirty-indicator {
   font-size: 0.8rem;
-  min-width: 36px;
-  text-align: right;
-  font-weight: 600;
+  color: color-mix(in srgb, var(--text-general) 50%, transparent);
+  font-family: 'Formula1Bold';
 }
 
-.preset-add-btn {
-  margin-top: 0.75rem;
+.driver-presets-dirty-indicator.active {
+  color: #ffb648;
+}
+
+.driver-presets-action-btn {
+  background: var(--elements);
+  color: var(--text-general);
+  border: 1px solid color-mix(in srgb, var(--text-general) 15%, transparent);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.driver-presets-action-btn:hover {
+  border-color: #00d2d3;
+}
+
+.driver-presets-action-btn.primary {
   background: #00d2d3;
   color: #111;
-  font-weight: 600;
-  border: none;
-  padding: 8px 24px;
-  border-radius: 6px;
-  cursor: pointer;
+  border-color: #00d2d3;
 }
 
-.preset-add-btn:hover {
+.driver-presets-action-btn.primary:hover {
   opacity: 0.85;
+}
+
+.driver-presets-table-wrap {
+  overflow: auto;
+  max-height: calc(90vh - 160px);
+  background: var(--elements);
+  border-radius: 8px;
+}
+
+.driver-presets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.driver-presets-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--elements);
+  padding: 8px 6px;
+  text-align: center;
+  font-family: 'Formula1Bold';
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-general) 65%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-general) 15%, transparent);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.driver-presets-table thead th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.driver-presets-table thead th.sortable:hover {
+  color: var(--text-general);
+}
+
+.driver-presets-table thead th.sort-asc::after {
+  content: " ▲";
+  font-size: 0.6rem;
+  color: #00d2d3;
+}
+
+.driver-presets-table thead th.sort-desc::after {
+  content: " ▼";
+  font-size: 0.6rem;
+  color: #00d2d3;
+}
+
+.driver-presets-table tbody td {
+  padding: 2px 4px;
+  text-align: center;
+  color: var(--text-general);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-general) 6%, transparent);
+}
+
+.driver-presets-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--text-general) 4%, transparent);
+}
+
+.driver-presets-col-name {
+  text-align: left !important;
+  padding-left: 12px !important;
+}
+
+.driver-presets-name-cell {
+  text-align: left;
+  padding-left: 12px !important;
+  white-space: nowrap;
+}
+
+.driver-presets-stat-cell {
+  min-width: 46px;
+}
+
+.driver-presets-stat-input {
+  width: 42px;
+  padding: 3px 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-general);
+  font-size: 0.85rem;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.driver-presets-stat-input::-webkit-outer-spin-button,
+.driver-presets-stat-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.driver-presets-stat-input:hover {
+  border-color: color-mix(in srgb, var(--text-general) 20%, transparent);
+}
+
+.driver-presets-stat-input:focus {
+  outline: none;
+  border-color: #00d2d3;
+  background: color-mix(in srgb, #00d2d3 10%, transparent);
+}
+
+.driver-presets-stat-input.cell-overridden {
+  color: #6ecbff;
+  font-weight: 600;
+}
+
+.driver-presets-stat-input.cell-edited {
+  color: #ffb648;
+  font-weight: 600;
+  background: color-mix(in srgb, #ffb648 10%, transparent);
 }
