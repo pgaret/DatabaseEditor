@@ -115,25 +115,25 @@
     "accuracy": 89
   },
   "Oscar Piastri": {
-    "cornering": 87,
-    "braking": 86,
+    "cornering": 85,
+    "braking": 85,
     "control": 89,
-    "smoothness": 85,
+    "smoothness": 80,
     "adaptability": 83,
-    "overtaking": 90,
-    "defending": 88,
-    "reactions": 88,
+    "overtaking": 83,
+    "defending": 86,
+    "reactions": 87,
     "accuracy": 89
   },
   "Daniel Ricciardo": {
-    "cornering": 89,
-    "braking": 91,
+    "cornering": 88,
+    "braking": 89,
     "control": 84,
-    "smoothness": 79,
-    "adaptability": 81,
-    "overtaking": 94,
-    "defending": 85,
-    "reactions": 90,
+    "smoothness": 80,
+    "adaptability": 79,
+    "overtaking": 90,
+    "defending": 84,
+    "reactions": 85,
     "accuracy": 89
   },
   "George Russell": {
