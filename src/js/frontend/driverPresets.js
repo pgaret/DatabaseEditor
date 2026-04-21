@@ -392,24 +392,47 @@ function updateDirtyIndicator() {
     }
 }
 
-if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-        if (!dataLoaded) {
-            confirmModal("Load a save file first.");
+async function exportOverrides() {
+    if (!dataLoaded) {
+        confirmModal("Load a save file first.");
+        return;
+    }
+    const map = buildExportMap();
+    const json = JSON.stringify(map, null, 2) + "\n";
+
+    if (window.showSaveFilePicker) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                id: "driverStatOverrides",
+                suggestedName: "driver_stat_overrides.json",
+                types: [{
+                    description: "JSON",
+                    accept: { "application/json": [".json"] }
+                }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(json);
+            await writable.close();
             return;
+        } catch (err) {
+            if (err && err.name === "AbortError") return;
+            console.warn("showSaveFilePicker failed, falling back to download", err);
         }
-        const map = buildExportMap();
-        const json = JSON.stringify(map, null, 2) + "\n";
-        const blob = new Blob([json], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "driver_stat_overrides.json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    });
+    }
+
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "driver_stat_overrides.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+if (exportBtn) {
+    exportBtn.addEventListener("click", () => { exportOverrides(); });
 }
 
 export function request_driver_presets() {
