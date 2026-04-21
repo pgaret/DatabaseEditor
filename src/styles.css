@@ -860,6 +860,9 @@ i.bi-file-text:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+  min-height: 50px;
+  position: relative;
 }
 
 .general-top-panel .custom-dropdown {
@@ -3117,14 +3120,13 @@ body.mclaren-theme .background {
 .script-view.hide {
   opacity: 0;
   pointer-events: none;
-  visibility: none;
 }
 
 .script-view.hide.unloaded {
-  display: none;
+  display: none !important;
   opacity: 0;
   pointer-events: none;
-  visibility: none;
+  visibility: hidden;
 }
 
 .script-view.enter-from-right {
@@ -20322,6 +20324,21 @@ p.news-error-api-key {
   padding: 1rem 2rem;
   overflow-y: auto;
   max-height: calc(90vh - 60px);
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.presets-content > .presets-section {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.presets-content > .presets-section.hide {
+  display: none;
 }
 
 .preset-card {
@@ -20493,7 +20510,9 @@ p.news-error-api-key {
 
 .driver-presets-table-wrap {
   overflow: auto;
-  max-height: calc(90vh - 160px);
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 85vh;
   background: var(--elements);
   border-radius: 8px;
 }
@@ -20557,9 +20576,68 @@ p.news-error-api-key {
 }
 
 .driver-presets-name-cell {
-  text-align: left;
+  text-align: left !important;
   padding-left: 12px !important;
   white-space: nowrap;
+}
+
+.driver-presets-avg-cell {
+  font-family: 'Formula1Bold';
+  color: color-mix(in srgb, var(--text-general) 75%, transparent);
+}
+
+.driver-presets-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--text-general) 75%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--text-general) 10%, transparent);
+}
+
+.driver-presets-pagination-left,
+.driver-presets-pagination-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.driver-presets-page-size {
+  background: var(--elements);
+  color: var(--text-general);
+  border: 1px solid color-mix(in srgb, var(--text-general) 15%, transparent);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-family: 'Formula1Bold';
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.driver-presets-page-btn {
+  background: var(--elements);
+  color: var(--text-general);
+  border: 1px solid color-mix(in srgb, var(--text-general) 15%, transparent);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-family: 'Formula1Bold';
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.driver-presets-page-btn:hover:not(:disabled) {
+  border-color: #00d2d3;
+}
+
+.driver-presets-page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.driver-presets-page-info {
+  font-family: 'Formula1Bold';
 }
 
 .driver-presets-stat-cell {
