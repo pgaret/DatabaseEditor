@@ -7,6 +7,10 @@ const tbodyEl = document.getElementById("driverPresetsTbody");
 const searchEl = document.getElementById("driverPresetsSearch");
 const exportBtn = document.getElementById("driverPresetsExportBtn");
 const dirtyIndicator = document.getElementById("driverPresetsDirtyIndicator");
+const pageSizeEl = document.getElementById("driverPresetsPageSize");
+const pagePrevEl = document.getElementById("driverPresetsPagePrev");
+const pageNextEl = document.getElementById("driverPresetsPageNext");
+const pageInfoEl = document.getElementById("driverPresetsPageInfo");
 
 const STAT_COLUMNS = [
     { key: "cornering",     label: "Cor" },
@@ -22,6 +26,19 @@ const STAT_COLUMNS = [
     { key: "aggression",    label: "Agg" },
     { key: "marketability", label: "Mkt" }
 ];
+
+const AVG_EXCLUDED = new Set(["improvability", "aggression", "marketability"]);
+const AVG_KEYS = STAT_COLUMNS.filter(c => !AVG_EXCLUDED.has(c.key)).map(c => c.key);
+
+function computeAvg(eff) {
+    if (!eff) return null;
+    let sum = 0, n = 0;
+    for (const k of AVG_KEYS) {
+        const v = Number(eff[k]);
+        if (Number.isFinite(v)) { sum += v; n++; }
+    }
+    return n ? sum / n : null;
+}
 
 const STAT_LABELS_FULL = {
     cornering: "Cornering", braking: "Braking", control: "Control",
@@ -40,6 +57,8 @@ let sortKey = "name";
 let sortDir = 1; // 1 asc, -1 desc
 let searchTerm = "";
 let dataLoaded = false;
+let pageSize = 50;
+let pageIndex = 0;
 
 function clampStat(v) {
     const n = Math.round(Number(v));
@@ -51,6 +70,7 @@ export function load_driver_presets(drivers) {
     dbDrivers = Array.isArray(drivers) ? drivers : [];
     rebuildEffective();
     dataLoaded = true;
+    pageIndex = 0;
     renderTable();
 }
 
@@ -100,6 +120,14 @@ function renderHeader() {
     if (sortKey === "name") nameTh.classList.add(sortDir > 0 ? "sort-asc" : "sort-desc");
     row.appendChild(nameTh);
 
+    const avgTh = document.createElement("th");
+    avgTh.className = "driver-presets-col-avg sortable";
+    avgTh.textContent = "Avg";
+    avgTh.title = `Average of ${AVG_KEYS.map(k => STAT_LABELS_FULL[k]).join(", ")}`;
+    avgTh.dataset.sortKey = "avg";
+    if (sortKey === "avg") avgTh.classList.add(sortDir > 0 ? "sort-asc" : "sort-desc");
+    row.appendChild(avgTh);
+
     for (const col of STAT_COLUMNS) {
         const th = document.createElement("th");
         th.className = "driver-presets-col-stat sortable";
@@ -126,6 +154,9 @@ function renderBody() {
         if (sortKey === "name") {
             av = a.name.toLowerCase();
             bv = b.name.toLowerCase();
+        } else if (sortKey === "avg") {
+            av = computeAvg(effective.get(a.name)) ?? 0;
+            bv = computeAvg(effective.get(b.name)) ?? 0;
         } else {
             av = effective.get(a.name)?.[sortKey] ?? 0;
             bv = effective.get(b.name)?.[sortKey] ?? 0;
@@ -135,11 +166,31 @@ function renderBody() {
         return 0;
     });
 
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    if (pageIndex >= totalPages) pageIndex = totalPages - 1;
+    if (pageIndex < 0) pageIndex = 0;
+    const start = pageIndex * pageSize;
+    const end = Math.min(start + pageSize, total);
+    const pageRows = filtered.slice(start, end);
+
     const frag = document.createDocumentFragment();
-    for (const d of filtered) {
+    for (const d of pageRows) {
         frag.appendChild(buildRow(d));
     }
     tbodyEl.appendChild(frag);
+
+    renderPagination(total, start, end, totalPages);
+}
+
+function renderPagination(total, start, end, totalPages) {
+    if (pageInfoEl) {
+        pageInfoEl.textContent = total === 0
+            ? "0–0 of 0"
+            : `${start + 1}–${end} of ${total}`;
+    }
+    if (pagePrevEl) pagePrevEl.disabled = pageIndex <= 0;
+    if (pageNextEl) pageNextEl.disabled = pageIndex >= totalPages - 1;
 }
 
 function buildRow(d) {
@@ -152,6 +203,14 @@ function buildRow(d) {
     tr.appendChild(nameTd);
 
     const eff = effective.get(d.name) || {};
+
+    const avgTd = document.createElement("td");
+    avgTd.className = "driver-presets-avg-cell";
+    const avgVal = computeAvg(eff);
+    avgTd.textContent = avgVal == null ? "—" : avgVal.toFixed(1);
+    avgTd.dataset.name = d.name;
+    tr.appendChild(avgTd);
+
     for (const col of STAT_COLUMNS) {
         const td = document.createElement("td");
         td.className = "driver-presets-stat-cell";
@@ -193,6 +252,17 @@ theadEl.addEventListener("click", (e) => {
     renderTable();
 });
 
+function updateAvgCell(name) {
+    if (AVG_EXCLUDED.size && AVG_KEYS.length) {
+        const row = tbodyEl.querySelector(`tr[data-name="${CSS.escape(name)}"]`);
+        if (!row) return;
+        const avgTd = row.querySelector(".driver-presets-avg-cell");
+        if (!avgTd) return;
+        const avg = computeAvg(effective.get(name));
+        avgTd.textContent = avg == null ? "—" : avg.toFixed(1);
+    }
+}
+
 tbodyEl.addEventListener("input", (e) => {
     const input = e.target.closest("input.driver-presets-stat-input");
     if (!input) return;
@@ -209,6 +279,7 @@ tbodyEl.addEventListener("input", (e) => {
     if (eff) eff[key] = newVal;
 
     markInputState(input, name, key, newVal);
+    updateAvgCell(name);
     updateDirtyIndicator();
 });
 
@@ -225,12 +296,41 @@ tbodyEl.addEventListener("change", (e) => {
     const eff = effective.get(name);
     if (eff) eff[key] = clamped;
     markInputState(input, name, key, clamped);
+    updateAvgCell(name);
     updateDirtyIndicator();
 });
 
 if (searchEl) {
     searchEl.addEventListener("input", () => {
         searchTerm = searchEl.value.trim().toLowerCase();
+        pageIndex = 0;
+        renderBody();
+    });
+}
+
+if (pageSizeEl) {
+    pageSizeEl.addEventListener("change", () => {
+        const v = parseInt(pageSizeEl.value, 10);
+        if (Number.isFinite(v) && v > 0) {
+            pageSize = v;
+            pageIndex = 0;
+            renderBody();
+        }
+    });
+}
+
+if (pagePrevEl) {
+    pagePrevEl.addEventListener("click", () => {
+        if (pageIndex > 0) {
+            pageIndex -= 1;
+            renderBody();
+        }
+    });
+}
+
+if (pageNextEl) {
+    pageNextEl.addEventListener("click", () => {
+        pageIndex += 1;
         renderBody();
     });
 }
