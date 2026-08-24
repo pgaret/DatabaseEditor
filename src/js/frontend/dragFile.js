@@ -6,6 +6,10 @@ import { Command } from "../backend/command.js";
 let carAnalysisUtils = null;
 export const dbWorker = new Worker(new URL('../backend/worker.js', import.meta.url));
 
+let currentFileHandle = null;
+export function getCurrentFileHandle() { return currentFileHandle; }
+export function setCurrentFileHandle(handle) { currentFileHandle = handle; }
+
 const dropDiv = document.querySelector(".drop-div");
 const statusCircle = document.getElementById("statusCircle");
 const statusIcon = document.getElementById("statusIcon");
@@ -41,6 +45,7 @@ export const handleDrop = async (event) => {
             const handle = await item.getAsFileSystemHandle();
             
             if (handle) {
+                currentFileHandle = handle;
                 await saveHandleToRecents(handle);
                 const file = await handle.getFile();
                 await processSaveFile(file)

@@ -33,7 +33,7 @@ import {
 import { load_regulations, gather_regulations_data } from './regulations.js';
 import { loadRecordsList, loadTeamRecordsList } from './seasonViewer';
 import { resetStaffIDChanges, updateEditsWithModData } from '../backend/scriptUtils/modUtils.js';
-import { dbWorker, handleDragEnter, handleDragLeave, handleDragOver, handleDrop, processSaveFile } from './dragFile';
+import { dbWorker, handleDragEnter, handleDragLeave, handleDragOver, handleDrop, processSaveFile, getCurrentFileHandle, setCurrentFileHandle } from './dragFile';
 import { Command } from "../backend/command.js";
 import { saveAs } from "file-saver";
 import members from "../../data/members.json"
@@ -1520,7 +1520,7 @@ function downloadExportedSave(command) {
 
     startDownloadSaveProgressSimulation();
 
-    downloadSaveWorkerHandler = (msg) => {
+    downloadSaveWorkerHandler = async (msg) => {
         if (!isDownloadingSave) return;
 
         const response = msg?.data;
@@ -1542,6 +1542,24 @@ function downloadExportedSave(command) {
 
             if (finalData == null) {
                 throw new Error("Missing exported data");
+            }
+
+            const fileHandle = getCurrentFileHandle();
+            if (fileHandle) {
+                try {
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(new Blob([finalData], { type: "application/binary" }));
+                    await writable.close();
+                    finishDownloadSaveProgress();
+                    new_update_notifications("Save overwritten in place.", "success");
+                    return;
+                } catch (err) {
+                    if (err && err.name === "AbortError") {
+                        resetDownloadSaveProgress();
+                        return;
+                    }
+                    console.warn("In-place save failed, falling back to download", err);
+                }
             }
 
             saveAs(new Blob([finalData], { type: "application/binary" }), filename);
@@ -1977,6 +1995,7 @@ function populateRecentHandles(recents) {
                 console.error("No permission to access the file:", handle.name);
                 return;
             }
+            setCurrentFileHandle(fileHandle);
             const file = await fileHandle.getFile();
             await saveHandleToRecents(fileHandle);
             handle.lastOpened = new Date();
