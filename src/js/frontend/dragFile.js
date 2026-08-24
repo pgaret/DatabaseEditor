@@ -152,6 +152,17 @@ export async function processSaveFile(file) {
 }
 
 
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    fetch('/api/latest-save')
+        .then(res => {
+            if (!res.ok) throw new Error('No save available');
+            const name = (res.headers.get('Content-Disposition') || '').match(/filename="(.+)"/)?.[1] || 'save.sav';
+            return res.blob().then(blob => new File([blob], name));
+        })
+        .then(file => processSaveFile(file))
+        .catch(e => console.log('Auto-load skipped:', e.message));
+}
+
 async function updateStatusUI(type, textConfig) {
     statusIcon.classList.add("icon-scale-0");
     

@@ -1,8 +1,9 @@
-import { watch, existsSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { watch, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, basename, extname } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
+import { createServer } from 'node:http';
 import initSqlJs from 'sql.js';
 import { parseSav, repackSav } from './sav-io.js';
 import { getEnabledRules } from './rules/index.js';
@@ -118,6 +119,53 @@ async function main() {
   watch(config.saveDirectory, (event, filename) => {
     onFileChange(filename);
   });
+
+  const editorPort = config.editorPort || 3000;
+  const distDir = join(__dirname, '..', 'dist');
+  if (existsSync(distDir)) {
+    const mimeTypes = {
+      '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css',
+      '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml',
+      '.ico': 'image/x-icon', '.wasm': 'application/wasm', '.woff2': 'font/woff2',
+    };
+    createServer((req, res) => {
+      const urlPath = req.url.split('?')[0];
+
+      if (urlPath === '/api/latest-save') {
+        try {
+          const files = readdirSync(config.saveDirectory)
+            .filter(f => filePattern.test(f))
+            .map(f => ({ name: f, mtime: statSync(join(config.saveDirectory, f)).mtimeMs }))
+            .sort((a, b) => b.mtime - a.mtime);
+          if (!files.length) { res.writeHead(404); res.end('No saves found'); return; }
+          const data = readFileSync(join(config.saveDirectory, files[0].name));
+          res.writeHead(200, {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': `attachment; filename="${files[0].name}"`,
+          });
+          res.end(data);
+        } catch (e) {
+          res.writeHead(500); res.end(e.message);
+        }
+        return;
+      }
+
+      const filePath = join(distDir, urlPath === '/' ? 'index.html' : urlPath);
+      if (!filePath.startsWith(distDir)) { res.writeHead(403); res.end(); return; }
+      try {
+        const data = readFileSync(filePath);
+        res.writeHead(200, { 'Content-Type': mimeTypes[extname(filePath)] || 'application/octet-stream' });
+        res.end(data);
+      } catch {
+        res.writeHead(404);
+        res.end('Not found');
+      }
+    }).listen(editorPort, () => {
+      log(`Editor available at http://localhost:${editorPort}`);
+    });
+  } else {
+    log(`Editor dist/ not found at ${distDir} — run "npm run build" in the project root`);
+  }
 
   log('Watcher running (Ctrl+C to stop)');
 }
