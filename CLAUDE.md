@@ -58,6 +58,10 @@ Reference data for development — use these instead of requiring local game fil
 - `row-counts.md` — Row counts per table (save DB).
 - `src/data/save6.sav` — Full `.sav` file (GVAS container with embedded database).
 
+### Game-Level Modding (`MODDING.md`, `docs/modding/`)
+
+Everything established about modding F1M24 at the game-file level (pak containers, default database, UI mods, where game logic lives) is documented in [MODDING.md](MODDING.md), which indexes the detailed docs in `docs/modding/`. Consult these before reasoning about game files, pak extraction/repacking, or what is/isn't moddable.
+
 ### Save Watcher (`watcher/`)
 
 Standalone Node.js daemon that monitors the F1M24 SaveGames directory and auto-applies rules to saves. Uses binary pattern matching to find the GVAS/data boundary (no UESaveTool dependency). Installable as a Windows service. Has its own `package.json` — run `npm install` inside `watcher/` separately.
