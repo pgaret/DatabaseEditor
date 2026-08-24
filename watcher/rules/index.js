@@ -1,11 +1,13 @@
 import { strollLoyalty } from './stroll-loyalty.js';
 import { aiBuildingFix } from './ai-building-fix.js';
 import { affiliateSalaryCap } from './affiliate-salary-cap.js';
+import { mentalityGuardrails } from './mentality-guardrails.js';
 
 const ALL_RULES = {
   strollLoyalty,
   aiBuildingFix,
   affiliateSalaryCap,
+  mentalityGuardrails,
 };
 
 export function getEnabledRules(config) {

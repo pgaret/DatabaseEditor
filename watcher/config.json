@@ -5,6 +5,7 @@
   "rules": {
     "strollLoyalty": true,
     "aiBuildingFix": true,
-    "affiliateSalaryCap": true
+    "affiliateSalaryCap": true,
+    "mentalityGuardrails": true
   }
 }
