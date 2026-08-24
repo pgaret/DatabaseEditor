@@ -6,6 +6,7 @@
     "strollLoyalty": true,
     "aiBuildingFix": true,
     "affiliateSalaryCap": true,
-    "mentalityGuardrails": true
+    "mentalityGuardrails": true,
+    "prospectDevelopment": true
   }
 }
