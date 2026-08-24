@@ -1,0 +1,8 @@
+{
+  "saveDirectory": "C:\\Users\\pereg\\AppData\\Local\\F1Manager24\\Saved\\SaveGames",
+  "filePattern": "^(autosave|save\\d+)\\.sav$",
+  "debounceMs": 3000,
+  "rules": {
+    "strollLoyalty": true
+  }
+}

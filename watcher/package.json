@@ -1,0 +1,15 @@
+{
+  "name": "f1m-save-watcher",
+  "version": "1.0.0",
+  "description": "Watches F1 Manager 24 save files and auto-applies rules",
+  "type": "module",
+  "scripts": {
+    "start": "node watcher.js",
+    "install-service": "node install-service.js",
+    "uninstall-service": "node uninstall-service.js"
+  },
+  "dependencies": {
+    "sql.js": "^1.13.0",
+    "node-windows": "^1.0.0-beta.8"
+  }
+}
