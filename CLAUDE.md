@@ -52,9 +52,10 @@ The app is deployed on **Vercel** — serverless API routes live in `api/`, nigh
 
 Reference data for development — use these instead of requiring local game files or save files:
 
-- `databases/save-sample.db` — SQLite database extracted from a real F1M24 save (328 tables). Open with sql.js or any SQLite client for schema/data reference.
-- `schema.sql` — All CREATE TABLE/VIEW/INDEX statements, for quick lookup without loading the database.
-- `row-counts.md` — Row counts per table.
+- `databases/save-sample.db` — SQLite database extracted from a real F1M24 career save (328 tables). Open with sql.js or any SQLite client for schema/data reference.
+- `databases/volta-defaults.db` — Stock game-default database extracted from Volta.uexp (317 tables). This is what new careers start with — no career-specific data, just base game values.
+- `schema.sql` — All CREATE TABLE/VIEW/INDEX statements from the save DB, for quick lookup without loading the database.
+- `row-counts.md` — Row counts per table (save DB).
 - `src/data/save6.sav` — Full `.sav` file (GVAS container with embedded database).
 
 ### Save Watcher (`watcher/`)
