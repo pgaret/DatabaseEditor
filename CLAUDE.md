@@ -47,3 +47,16 @@ The app is deployed on **Vercel** — serverless API routes live in `api/`, nigh
 - **`commandGlobals.js`** holds runtime state (team replacement dict, pretty names) with getter/setter access.
 - `webpack.config.js` injects `APP_VERSION` and `BUILD_ID` via DefinePlugin at build time.
 - Environment variables needed for full functionality: `OPENAI_API_KEY`, `PATREON_CLIENT_ID`, `PATREON_REDIRECT_URI`, Upstash Redis credentials.
+
+### Fixtures (`fixtures/`)
+
+Reference data for development — use these instead of requiring local game files or save files:
+
+- `databases/save-sample.db` — SQLite database extracted from a real F1M24 save (328 tables). Open with sql.js or any SQLite client for schema/data reference.
+- `schema.sql` — All CREATE TABLE/VIEW/INDEX statements, for quick lookup without loading the database.
+- `row-counts.md` — Row counts per table.
+- `src/data/save6.sav` — Full `.sav` file (GVAS container with embedded database).
+
+### Save Watcher (`watcher/`)
+
+Standalone Node.js daemon that monitors the F1M24 SaveGames directory and auto-applies rules to saves. Uses binary pattern matching to find the GVAS/data boundary (no UESaveTool dependency). Installable as a Windows service. Has its own `package.json` — run `npm install` inside `watcher/` separately.
