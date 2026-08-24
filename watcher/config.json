@@ -3,6 +3,8 @@
   "filePattern": "^(autosave|save\\d+)\\.sav$",
   "debounceMs": 3000,
   "rules": {
-    "strollLoyalty": true
+    "strollLoyalty": true,
+    "aiBuildingFix": true,
+    "affiliateSalaryCap": true
   }
 }
