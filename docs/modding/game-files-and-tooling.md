@@ -56,3 +56,16 @@ Files named `<Name>_P.pak` dropped into `F1Manager24\Content\Paks` mount on top 
 - Third-party overhaul mods (e.g. RRacingV3) may bundle their own full database, masking any base-container edits — check what's mounted before debugging "my edit does nothing".
 - The game loads DB/tuning content at boot or career load; swapping containers mid-session silently does nothing until a full restart.
 - PowerShell chokes on deep `UIGameface` paths (>260 chars) — use `\\?\` path prefixes, or Node/rg instead.
+
+## Where the UI source actually lives
+
+The Coherent UI files are **not** in the IoStore containers — `retoc list` on any `.utoc` returns zero `UIGameface` hits. They sit in `pakchunk0-Windows.pak`, a ~5 GB pak **V11** container holding 9,078 loose files (1,470 of them `js/`), alongside the `.utoc`/`.ucas` pair of the same name.
+
+Read it with repak, which handles V11 (our `mods/unpack-pak.js` deliberately does not — it only covers the V3 paks we write):
+
+```bash
+repak -a 0x<key> list   pakchunk0-Windows.pak
+repak -a 0x<key> unpack pakchunk0-Windows.pak -o <outDir>
+```
+
+Both retoc and repak are single self-contained exes from GitHub releases (`trumank/retoc`, `trumank/repak`); neither needs installing, and both publish `.sha256` files worth checking. The base JS is plain, readable, ASCII-only and CRLF — match that in overrides.

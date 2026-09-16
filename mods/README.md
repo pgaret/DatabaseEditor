@@ -28,6 +28,7 @@ This is how every folder here was recovered after the original working copies we
 | Folder | What it does |
 |---|---|
 | `zz_PitCrewAuto` | Adds an 'Auto-Optimize' button to the pit crew training screen that fills the month with drills/gym and rests just enough before each race. |
+| `zz_StrategyDefaults` | Opens the race weekend setup screen with fuel load at the minimum and Fuel Usage on Conserve. |
 | `zz_PerfectSetup` | Adds a 'Perfect Setup' button to the race weekend setup screen that solves the sliders to the revealed ideal handling targets. |
 | `zz_NerobaxPreset` | Replaces the Balanced design preset's recipe and relabels it 'Nerobax'. |
 | `zz_VettelFace` | Maps face/body textures onto un-retired drivers whose portraits the game ships but doesn't wire up. |

@@ -9,7 +9,7 @@ F1M24's entire management UI is HTML/CSS/JS running in Coherent Gameface. The JS
 
 ## Shipped mods (case studies)
 
-Source for all four lives in [`mods/`](../../mods/README.md). `node mods/build-pak.js <name>` rebuilds a pak and `node mods/unpack-pak.js <file.pak> [outDir]` reads one back, neither needing retoc, repak, or the AES key — these paks store their JS uncompressed and unencrypted, so a shipped pak is always recoverable.
+Source for all five lives in [`mods/`](../../mods/README.md). `node mods/build-pak.js <name>` rebuilds a pak and `node mods/unpack-pak.js <file.pak> [outDir]` reads one back, neither needing retoc, repak, or the AES key — these paks store their JS uncompressed and unencrypted, so a shipped pak is always recoverable.
 
 ### `zz_VettelFace_1_P` — portrait overrides for un-retired drivers
 
@@ -39,3 +39,12 @@ Overrides `js/project/modules/staff/pitCrew/TMPitCrewDevelopment.js`, adding an 
 - Policy: calibrate (rest the whole month, read each race day's projected fatigue; drill the whole month, read it again — those two readings bracket what's achievable) → fill with drills (Balanced focus) → once projected cumulative `PitStopStages.chanceOfErrorTotal` ≤ 5%, switch later days to gym → gym days with ~0 projected stat delta (stats 32–42 minus 38) revert to drills → before each race day, rest the nearest prior sessions until its fatigue reaches `rested + 0.3 × (drilled − rested)`. ~900 ms settle waits between phases.
 - **Do not treat the fatigue figure as a percentage.** Its units are not established: the enum `Staff_Enum_Fatigue` is 0–3 (WellRested/Fatigued/Tired/Exhausted) while `Staff_PitCrew_RaceWeekendFatigue.Val` in a save runs ~168–400. The original version normalized it as 0..1/0..100 and compared against a fixed 24% target, which no reading could satisfy — every session in the month got converted to Rest. Hence the per-race-day calibration above, plus two backstops: at most 6 rested sessions per race, and abandon a race after two rests that don't move its number. The rest count is reported back in the button label.
 - The same 0..1/0..100 normalization is still applied to `chanceOfErrorTotal`, which does read as a probability; only fatigue needed the scale-free treatment.
+
+### `zz_StrategyDefaults_1_P` — minimum fuel & Conserve by default
+
+Overrides two components on the same race weekend setup screen as Perfect Setup (`CarSetup.js` composes `CarSetupTyres`, `CarSetupComponents`, `CarSetupSetup`, `CarSetupFuel` and — outside qualifying — `CarSetupOptions`).
+
+- **Fuel load → minimum** (`CarSetupFuel.js`). `getPreSessionPlayerCarContext(playerCar)` carries `minimumAllowedFuelLoad` and `estimatedFuelUsagePerLap`; the current load is `previewFuelLevel` on `getPracticePlayerCarContext(playerCar)`. Edit event `FuelLoadChange(carID, fuelLoad, laps)` — the same one the stepper sends. Qualifying is untouched: its run plan is flying laps plus `additionalLapsOfFuel`, not a fuel figure. `MOD_MIN_FUEL_IN_RACE` at the top of the file gates whether race sessions get it too — the minimum is not clamped to race distance, so a race left on it runs dry.
+- **Fuel Usage → Conserve** (`CarSetupOptions.js`). The `[CAR_SETUP_FUEL_USAGE]` row is backed by `liftAndCoastStrategy` on `[...getPlayerCarContext(playerCar), 'CarInteraction']`: `LiftAndCoastStrategy` is None=0 (Push, 3 dots) / Balanced=1 (2 dots) / Conserve=2 (1 dot), so minimum usage is Conserve=2. Event `DriverCommandLiftAndCoastChange(carID, strategy)`.
+- **Put a default on a component that actually mounts.** `ButtonDropDown` renders its children only while `isExpanded`, so `CarSetupLiftAndCoastRow` (and the inner `CarSetupFuelPracticeRace`) do not exist until the player opens that dropdown — far too late for a default. Both defaults therefore live in the always-mounted outer component.
+- Each default is applied once per `carID` + `Weekend.currentStage`, so a manual change sticks for the rest of the session and the next session defaults again.

@@ -16,7 +16,7 @@ Index of everything we've established about modding F1M24 at the game-file level
 |---|---|
 | [game-files-and-tooling.md](docs/modding/game-files-and-tooling.md) | Install layout, IoStore containers, obtaining the AES key, retoc usage, the two working mod-delivery routes (raw-chunk splice, legacy `_P` paks), known tooling failures |
 | [default-database.md](docs/modding/default-database.md) | Volta.uexp binary layout, carve/splice pipeline, enum-filtering limits, un-retiring drivers, why behavioral rules aren't data-encodable |
-| [ui-mods.md](docs/modding/ui-mods.md) | Datastore/event architecture, and the four shipped UI mods as case studies (portrait overrides, Nerobax preset, Perfect Setup, pit-crew auto-optimizer) |
+| [ui-mods.md](docs/modding/ui-mods.md) | Datastore/event architecture, and the five shipped UI mods as case studies (portrait overrides, Nerobax preset, Perfect Setup, pit-crew auto-optimizer, race weekend strategy defaults) |
 | [logic-layers.md](docs/modding/logic-layers.md) | Spike results: where logic actually lives, the ~169 tunable Management/RaceSim assets, and a decision guide for which layer to use per goal |
 
 ## Quick facts
