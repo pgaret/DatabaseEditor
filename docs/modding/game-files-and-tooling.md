@@ -68,4 +68,4 @@ repak -a 0x<key> list   pakchunk0-Windows.pak
 repak -a 0x<key> unpack pakchunk0-Windows.pak -o <outDir>
 ```
 
-Both retoc and repak are single self-contained exes from GitHub releases (`trumank/retoc`, `trumank/repak`); neither needs installing, and both publish `.sha256` files worth checking. The base JS is plain, readable, ASCII-only and CRLF — match that in overrides.
+Both retoc and repak are single self-contained exes from GitHub releases (`trumank/retoc`, `trumank/repak`); neither needs installing, and both publish `.sha256` files worth checking. Checked-out copies of both, plus the AES key, are parked in the gitignored `tools/` directory (see `tools/README.md`) so they survive between sessions. The base JS is plain, readable, ASCII-only and CRLF — match that in overrides.
