@@ -9,7 +9,7 @@ F1M24's entire management UI is HTML/CSS/JS running in Coherent Gameface. The JS
 
 ## Shipped mods (case studies)
 
-Source for all five lives in [`mods/`](../../mods/README.md). `node mods/build-pak.js <name>` rebuilds a pak and `node mods/unpack-pak.js <file.pak> [outDir]` reads one back, neither needing retoc, repak, or the AES key — these paks store their JS uncompressed and unencrypted, so a shipped pak is always recoverable.
+Source for all six lives in [`mods/`](../../mods/README.md). `node mods/build-pak.js <name>` rebuilds a pak and `node mods/unpack-pak.js <file.pak> [outDir]` reads one back, neither needing retoc, repak, or the AES key — these paks store their JS uncompressed and unencrypted, so a shipped pak is always recoverable.
 
 ### `zz_VettelFace_1_P` — portrait overrides for un-retired drivers
 
@@ -48,3 +48,15 @@ Overrides two components on the same race weekend setup screen as Perfect Setup 
 - **Fuel Usage → Conserve** (`CarSetupOptions.js`). The `[CAR_SETUP_FUEL_USAGE]` row is backed by `liftAndCoastStrategy` on `[...getPlayerCarContext(playerCar), 'CarInteraction']`: `LiftAndCoastStrategy` is None=0 (Push, 3 dots) / Balanced=1 (2 dots) / Conserve=2 (1 dot), so minimum usage is Conserve=2. Event `DriverCommandLiftAndCoastChange(carID, strategy)`.
 - **Put a default on a component that actually mounts.** `ButtonDropDown` renders its children only while `isExpanded`, so `CarSetupLiftAndCoastRow` (and the inner `CarSetupFuelPracticeRace`) do not exist until the player opens that dropdown — far too late for a default. Both defaults therefore live in the always-mounted outer component.
 - Each default is applied once per `carID` + `Weekend.currentStage`, so a manual change sticks for the rest of the session and the next session defaults again.
+
+### `zz_PaceOptimiser_1_P` — stint pace hill-climber
+
+Overrides `js/project/modules/raceWeekend/strategyView/StintList.js`, adding an 'Optimise Pace' button under the stint rows. The generated strategies tend to leave a stint on Standard when the tyre has life to spare; the generator is native C++ with no data-asset lever (the only `Strategy` assets under `Content/RaceSim` + `Content/Management` are `AISpendingStrategyPresets`/`AIDecisionSet_SelectSpendingStrategy`, i.e. finances), so this post-processes the plan in the editor instead.
+
+- Edit working copy at `['RaceSim','CarStrategyEdit','Current']` (`StrategyDataHelper.EDIT_STRATEGY_CONTEXT`), stints under `.../Stints/<i>` — but enumerate via the `DataStoreCollection` the list already binds, since the context id is the stint id passed to events, not necessarily the row order.
+- Per stint: `startLap`, `pitLap`, `endLap`, **`tyreEndLap`**, `startTime`, `endTime`, `tyreWearMultiplier`, `tyreStartWear`, **`tyreEndWear`**, `tyreType`, `tyreID`, `tyreWearStrategy`. Strategy-level: **`estimatedRaceTimeSeconds`**, `stintCount`, `currentStint`, `canAddStint`, `fuelCapacity`.
+- Lever: `StrategyStintEditTyreWearStrategy(carIndex, stintId, value)`. `TyreWearSavingStrategy` runs **Attack=0 … Conserve=4**, so raising intensity means *decrementing*; the UI's dot count is `COUNT - strategy`.
+- Policy: for each editable stint (`isPreSession || index >= currentStint`), step intensity up while `estimatedRaceTimeSeconds` improves by >0.05 s **and** every editable stint still survives; on the first failure put the stint back and move on. Two sweeps, since raising one stint shifts fuel and pit laps elsewhere. Capped at 40 steps; ~450 ms settle per step.
+- Survival test is `tyreEndLap >= endLap` plus a 5% margin on `tyreEndWear`. **The wear scale's direction is measured, not assumed** — compare `tyreStartWear` to `tyreEndWear` on any stint and see which way it moves. If neither signal is present the button declines ('NO TYRE DATA') rather than optimise on time alone, which could shred tyres.
+- Nothing is committed until the existing confirm button is pressed, and every step is individually reverted if it doesn't pay, so a run can only leave the plan as good as it found it. Result is reported in the button label (`OPTIMISE PACE -12.4S` / `NO GAIN`).
+- Caveat worth remembering: `estimatedRaceTimeSeconds` is a clean-air projection — no safety cars, no traffic, no undercut. It optimises predicted time, which is not the same as finishing position; hence the deliberate tyre margin.
