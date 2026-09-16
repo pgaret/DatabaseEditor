@@ -9,7 +9,7 @@ F1M24's entire management UI is HTML/CSS/JS running in Coherent Gameface. The JS
 
 ## Shipped mods (case studies)
 
-Source for these lives in [`mods/`](../../mods/README.md) where it has been recovered — currently only `zz_PitCrewAuto`. `node mods/build-pak.js <name>` rebuilds a pak with no external tooling. For the rest, the JS can be read straight out of the installed pak: it is stored uncompressed, 53 bytes in.
+Source for all four lives in [`mods/`](../../mods/README.md). `node mods/build-pak.js <name>` rebuilds a pak and `node mods/unpack-pak.js <file.pak> [outDir]` reads one back, neither needing retoc, repak, or the AES key — these paks store their JS uncompressed and unencrypted, so a shipped pak is always recoverable.
 
 ### `zz_VettelFace_1_P` — portrait overrides for un-retired drivers
 
