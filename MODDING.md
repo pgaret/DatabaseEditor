@@ -25,3 +25,4 @@ Index of everything we've established about modding F1M24 at the game-file level
 - Mods load as `<Name>_P` paks in `F1Manager24\Content\Paks`; `zz_` prefix wins load order.
 - The game reads DB/tuning content only at boot/career load, and saves only at save load — restart to test container changes; post-write save editing is safe.
 - Extracted reference copies of the default DB and schema are committed under `fixtures/`.
+- UI mod source lives in [`mods/`](mods/README.md); `node mods/build-pak.js <name>` rebuilds a pak without retoc or repak.
