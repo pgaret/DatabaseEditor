@@ -33,7 +33,7 @@ import {
 import { load_regulations, gather_regulations_data } from './regulations.js';
 import { loadRecordsList, loadTeamRecordsList } from './seasonViewer';
 import { resetStaffIDChanges, updateEditsWithModData } from '../backend/scriptUtils/modUtils.js';
-import { dbWorker, handleDragEnter, handleDragLeave, handleDragOver, handleDrop, processSaveFile, getCurrentFileHandle, setCurrentFileHandle } from './dragFile';
+import { dbWorker, handleDragEnter, handleDragLeave, handleDragOver, handleDrop, processSaveFile, getCurrentFileHandle, setCurrentFileHandle, getLocalSave, writeLocalSave } from './dragFile';
 import { Command } from "../backend/command.js";
 import { saveAs } from "file-saver";
 import members from "../../data/members.json"
@@ -1542,6 +1542,17 @@ function downloadExportedSave(command) {
 
             if (finalData == null) {
                 throw new Error("Missing exported data");
+            }
+
+            if (getLocalSave() && command === "exportSave") {
+                try {
+                    await writeLocalSave(new Blob([finalData], { type: "application/binary" }));
+                    finishDownloadSaveProgress();
+                    new_update_notifications("Save overwritten in the game's save folder.", "success");
+                    return;
+                } catch (err) {
+                    console.warn("Local overwrite failed, falling back to download", err);
+                }
             }
 
             const fileHandle = getCurrentFileHandle();

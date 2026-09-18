@@ -72,6 +72,9 @@ const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 export async function processSaveFile(file) {
     if (!file) return;
 
+    // A save opened by hand (drop, picker, recents) takes over from the watcher's one
+    if (localSave && localSave.file !== file) localSave = null;
+
     // --- Validaciones de archivo ---
     if (file.name.split('.').pop() === "vdf") {
         console.error("File not supported");
@@ -152,14 +155,156 @@ export async function processSaveFile(file) {
 }
 
 
-if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    fetch('/api/latest-save')
-        .then(res => {
-            if (!res.ok) throw new Error('No save available');
-            const name = (res.headers.get('Content-Disposition') || '').match(/filename="(.+)"/)?.[1] || 'save.sav';
-            return res.blob().then(blob => new File([blob], name));
-        })
-        .then(file => processSaveFile(file))
+// --- Local mode (served by watcher/watcher.js) ---
+// The watcher serves the newest save from the game's SaveGames directory and
+// accepts exports back, so no file handle or download is needed.
+const LOCAL_SAVE_POLL_MS = 5 * 60 * 1000;
+let localSave = null; // { name, mtime } of the save loaded from the watcher
+let dismissedLocalSaveMtime = 0;
+
+export function getLocalSave() { return localSave; }
+
+async function loadLatestLocalSave() {
+    const res = await fetch('/api/latest-save', { cache: 'no-store' });
+    if (!res.ok) throw new Error('No save available');
+    const name = (res.headers.get('Content-Disposition') || '').match(/filename="(.+)"/)?.[1] || 'save.sav';
+    const mtime = Number(res.headers.get('X-Save-Mtime')) || Date.now();
+    const file = new File([await res.blob()], name);
+    currentFileHandle = null;
+    clearTimeout(autosaveTimer);
+    localSave = { name, mtime, file };
+    await processSaveFile(file);
+}
+
+export async function writeLocalSave(data) {
+    const target = localSave;
+    const res = await fetch(`/api/save/${encodeURIComponent(target.name)}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/octet-stream',
+            // First write since this save was loaded: have the watcher keep a copy of the original
+            ...(target.backedUp ? {} : { 'X-Backup': '1' }),
+        },
+        body: data,
+    });
+    if (!res.ok) throw new Error(await res.text());
+    if (localSave === target) localSave = { ...(await res.json()), backedUp: true };
+}
+
+// --- Autosave: the worker reports "DB modified" after any command that wrote
+// to the database; a couple of seconds later we export and push to the watcher.
+const AUTOSAVE_DELAY_MS = 2000;
+let autosaveTimer = null;
+let autosaveRunning = false;
+let autosavePending = false;
+
+function setAutosaveStatus(text, isError = false) {
+    let pill = document.querySelector('.local-autosave-status');
+    if (!pill) {
+        pill = document.createElement('div');
+        pill.className = 'local-autosave-status';
+        pill.style.cssText = 'position:fixed;right:20px;bottom:30px;z-index:2000;padding:3px 10px;border-radius:12px;' +
+            'background:#1f1f2b;border:1px solid #3a3a4d;font-size:12px;pointer-events:none;';
+        document.body.appendChild(pill);
+    }
+    pill.textContent = text;
+    pill.style.color = isError ? '#ff6b6b' : '#9fe6a0';
+}
+
+function exportSaveData() {
+    return new Promise((resolve, reject) => {
+        const handler = (msg) => {
+            const response = msg.data;
+            if (response?.command !== 'exportSave') return;
+            if (response.responseMessage !== 'Database exported' && !response.error) return;
+            dbWorker.removeEventListener('message', handler);
+            if (response.error || response.content?.finalData == null) reject(new Error(response.error || 'Missing exported data'));
+            else resolve(response.content.finalData);
+        };
+        dbWorker.addEventListener('message', handler);
+        dbWorker.postMessage({ command: 'exportSave', data: {} });
+    });
+}
+
+async function runAutosave() {
+    if (!localSave) return;
+    if (autosaveRunning) { autosavePending = true; return; }
+    autosaveRunning = true;
+    setAutosaveStatus('Saving…');
+    try {
+        const finalData = await exportSaveData();
+        await writeLocalSave(new Blob([finalData], { type: 'application/binary' }));
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setAutosaveStatus(`Saved to ${localSave.name} at ${time}`);
+    } catch (e) {
+        console.error('Autosave failed:', e);
+        setAutosaveStatus(`Autosave failed: ${e.message} (will retry on next edit)`, true);
+    } finally {
+        autosaveRunning = false;
+        if (autosavePending) { autosavePending = false; scheduleAutosave(); }
+    }
+}
+
+function scheduleAutosave() {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(runAutosave, AUTOSAVE_DELAY_MS);
+}
+
+dbWorker.addEventListener('message', (msg) => {
+    if (msg.data?.responseMessage !== 'DB modified' || !localSave) return;
+    // Loading a save writes the editor's own bookkeeping tables; that alone isn't worth a write
+    if (msg.data.command === 'saveSelected') return;
+    scheduleAutosave();
+});
+
+function offerLocalSaveSwitch(latest) {
+    document.querySelector('.local-save-offer')?.remove();
+
+    const offer = document.createElement('div');
+    offer.className = 'local-save-offer';
+    offer.style.cssText = 'position:fixed;right:20px;bottom:60px;z-index:2000;padding:12px 16px;border-radius:8px;' +
+        'background:#1f1f2b;color:#fff;border:1px solid #3a3a4d;box-shadow:0 4px 16px rgba(0,0,0,.4);font-size:14px;';
+    const time = new Date(latest.mtime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const text = document.createElement('div');
+    text.textContent = `Newer save found: ${latest.name} (${time}). Unsaved edits will be lost.`;
+    const buttons = document.createElement('div');
+    buttons.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:10px;';
+    const switchButton = document.createElement('button');
+    switchButton.className = 'btn btn-sm btn-primary';
+    switchButton.textContent = 'Switch';
+    const dismissButton = document.createElement('button');
+    dismissButton.className = 'btn btn-sm btn-secondary';
+    dismissButton.textContent = 'Dismiss';
+    buttons.append(dismissButton, switchButton);
+    offer.append(text, buttons);
+
+    switchButton.addEventListener('click', () => {
+        offer.remove();
+        loadLatestLocalSave().catch(e => console.error('Switching save failed:', e));
+    });
+    dismissButton.addEventListener('click', () => {
+        dismissedLocalSaveMtime = latest.mtime;
+        offer.remove();
+    });
+
+    document.body.appendChild(offer);
+}
+
+async function checkForNewerLocalSave() {
+    if (!localSave) return;
+    try {
+        const res = await fetch('/api/latest-save/info', { cache: 'no-store' });
+        if (!res.ok) return;
+        const latest = await res.json();
+        if (latest.mtime > localSave.mtime + 1 && latest.mtime > dismissedLocalSaveMtime) offerLocalSaveSwitch(latest);
+    } catch (e) {
+        console.log('Local save check failed:', e.message);
+    }
+}
+
+if (window.__SAVE_WATCHER__) {
+    loadLatestLocalSave()
+        .then(() => setInterval(checkForNewerLocalSave, LOCAL_SAVE_POLL_MS))
         .catch(e => console.log('Auto-load skipped:', e.message));
 }
 

@@ -937,12 +937,27 @@ const workerCommands = {
 };
 
 
+// Lets the frontend autosave: after every command, report whether it wrote to the DB.
+let lastTotalChanges = 0;
+function notifyIfDatabaseModified(command) {
+  const db = getDatabase();
+  if (!db) return;
+  const totalChanges = db.exec("SELECT total_changes()")[0].values[0][0];
+  const modified = totalChanges !== lastTotalChanges;
+  lastTotalChanges = totalChanges;
+  // Loading swaps the DB; exporting writes its own bookkeeping. Neither is a user edit.
+  if (modified && !["loadDB", "exportSave", "panicDownload"].includes(command)) {
+    postMessage({ command, responseMessage: "DB modified" });
+  }
+}
+
 self.addEventListener('message', async (e) => {
   console.log(e.data);
   const { command, data } = e.data;
   if (workerCommands[command]) {
     try {
       await workerCommands[command](data, (response) => postMessage({ command, ...response }));
+      notifyIfDatabaseModified(command);
     } catch (error) {
       console.error(`[Worker] Error executing command '${command}':`, error);
       postMessage({ command, responseMessage: "Error", error: error.message });

@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "build": "webpack",
+    "local": "webpack && node watcher/watcher.js",
     "optimize:logos": "node scripts/optimize-team-logos.js"
   },
   "repository": "https://github.com/IUrreta/DatabaseEditor",

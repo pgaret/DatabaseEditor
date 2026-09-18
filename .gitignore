@@ -27,3 +27,4 @@ AGENTS.md
 scripts/
 # local modding tools (third-party binaries + game AES key)
 /tools/
+watcher/backups/
