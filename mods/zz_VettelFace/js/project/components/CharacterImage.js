@@ -11,14 +11,14 @@ define(["require", "exports", "common/core/DataStore", "common/lib/classnames", 
     const BODY_OVERRIDES = {
         9: 'StaffPhotos/Bodies/RacingOveralls/Male/FrontThin/Free_Driver_Thin_premultiplied'
     };
+    const isUsableBody = (value) => !!value && !('' + value).includes('MissingBody');
     // The game has no Photo.Body for un-retired drivers, so they fell back to the
     // unbranded overalls above and never picked up team kit. Resolve the team's
     // overalls the same way the engine does for its own overwriteBodyImageTeam
     // path: StaffConstants/Overalls/F<formula>[/<teamID> for F1]/<0 driver|1 staff>
     // /<gender>, read with the staff member's BodyType as the property name.
-    const resolveTeamOveralls = (staffId) => {
+    const resolveTeamOveralls = (staffId, teamID) => {
         const stringID = staffId.toString();
-        const teamID = DS.getValue(['Staff', stringID], 'teamID');
         if (teamID == null)
             return null;
         let location = ['StaffConstants', 'Overalls'];
@@ -41,10 +41,26 @@ define(["require", "exports", "common/core/DataStore", "common/lib/classnames", 
             return null;
         location = location.concat([(staffType == GameTypes_1.EStaffType.Driver) ? '0' : '1', gender + '']);
         const overalls = DS.getValue(location, bodyType + '');
-        if (!overalls || ('' + overalls).includes('MissingBody'))
-            return null;
-        return overalls;
+        return isUsableBody(overalls) ? overalls : null;
     };
+    // BodyType comes from the same StaffPhotoData entry the un-retired driver is
+    // missing, so the lookup above can come up empty too. A teammate's Photo.Body
+    // is already that team's kit, so borrow it.
+    const TEAMMATE_SLOTS = ['driver1ID', 'driver2ID', 'reserveDriverID'];
+    const borrowTeammateBody = (staffId, teamID) => {
+        if (teamID == null || teamID === -1)
+            return null;
+        for (const slot of TEAMMATE_SLOTS) {
+            const mateID = DS.getValue(['Teams', 'TeamsList', teamID + ''], slot);
+            if (mateID == null || mateID < 0 || mateID == staffId || BODY_OVERRIDES[mateID] != undefined)
+                continue;
+            const body = DS.getValue(['Staff', mateID + '', 'Photo'], 'Body');
+            if (isUsableBody(body))
+                return body;
+        }
+        return null;
+    };
+    const resolveOverrideBody = (staffId, teamID) => resolveTeamOveralls(staffId, teamID) ?? borrowTeammateBody(staffId, teamID) ?? BODY_OVERRIDES[staffId];
     class CharacterImage extends preact.Component {
         static defaultProps = {
             showAnimation: true
@@ -95,7 +111,10 @@ define(["require", "exports", "common/core/DataStore", "common/lib/classnames", 
             this._dataStoreHelper.clear();
             if (this.props.staffId != undefined && this.props.staffId != null) {
                 const stringID = this.props.staffId.toString();
-                if (this.props.overwriteBodyImageTeam != undefined) {
+                if (this.props.overwriteBodyImageTeam != undefined && BODY_OVERRIDES[this.props.staffId] != undefined) {
+                    this.onGotBody(resolveOverrideBody(this.props.staffId, this.props.overwriteBodyImageTeam));
+                }
+                else if (this.props.overwriteBodyImageTeam != undefined) {
                     let overallsDatastoreLocation = ['StaffConstants', 'Overalls'];
                     if (this.props.overwriteBodyImageTeam == -1) {
                         overallsDatastoreLocation.push('Unemployed');
@@ -138,8 +157,8 @@ define(["require", "exports", "common/core/DataStore", "common/lib/classnames", 
         };
         onGotBody = (value) => {
             const bodyOverride = BODY_OVERRIDES[this.props.staffId];
-            if (bodyOverride && (value == null || value == '' || value.includes('MissingBody'))) {
-                value = resolveTeamOveralls(this.props.staffId) ?? bodyOverride;
+            if (bodyOverride && !isUsableBody(value)) {
+                value = resolveOverrideBody(this.props.staffId, DS.getValue(['Staff', this.props.staffId.toString()], 'teamID'));
             }
             this.setState({ bodyImage: (value ?? 'StaffPhotos/Bodies/MissingBody') });
         };
