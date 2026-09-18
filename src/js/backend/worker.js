@@ -91,8 +91,13 @@ const workerCommands = {
     const isCurrentYear = data.isCurrentYear ?? true;
     const formula = data.formula ? Number(data.formula) : 1;
     const results = fetchSeasonResults(year, isCurrentYear, formula === 1, formula);
-    const events = fetchEventsFrom(year, formula);
-    const teams = fetchTeamsStandingsWithPositionChange(year, formula);
+    // Past F2/F3 seasons only keep final standings: no race columns, no position-change arrows
+    const standingsOnly = results.some(r => r.standingsOnly);
+    const events = standingsOnly ? [] : fetchEventsFrom(year, formula);
+    let teams = fetchTeamsStandingsWithPositionChange(year, formula);
+    if (standingsOnly) {
+      teams = teams.map(([teamId, pos, , points]) => [teamId, pos, 0, points]);
+    }
     const pointsInfo = fetchPointsRegulations()
 
     postMessage({

@@ -374,9 +374,12 @@ function forceStandingsCurrentSeason() {
     const yearMenu = document.querySelector("#yearMenu")
     const yearItems = yearMenu ? Array.from(yearMenu.querySelectorAll("a")) : []
     if (yearItems.length > 1) {
-        const currentYearEl = yearItems.find(item => item.dataset.year !== "all")
-        if (currentYearEl) {
-            manageRecordsSelected(currentYearEl)
+        // keep the season already being viewed; All Time has no standings, so fall back to the current season
+        const selectedYear = document.getElementById("yearButton")?.dataset?.year
+        const yearEl = yearItems.find(item => item.dataset.year !== "all" && item.dataset.year === selectedYear)
+            || yearItems.find(item => item.dataset.year !== "all")
+        if (yearEl) {
+            manageRecordsSelected(yearEl)
         }
     }
 }
@@ -384,12 +387,8 @@ function forceStandingsCurrentSeason() {
 function updateSeriesControls() {
     const showRecordsControls = currentFormula === 1
     const recordsWrapper = document.getElementById("recordsTypeButton")?.closest(".dropdown-global")
-    const yearWrapper = document.getElementById("yearButton")?.closest(".dropdown-global")
     if (recordsWrapper) {
         recordsWrapper.classList.toggle("d-none", !showRecordsControls)
-    }
-    if (yearWrapper) {
-        yearWrapper.classList.toggle("d-none", !showRecordsControls)
     }
 }
 
@@ -1141,12 +1140,14 @@ export function new_load_teams_table(data) {
     pairTeamPos.forEach(function (pair) {
         pairTeamPosDict[pair[0]] = {
             pos: Number(pair[1]),
-            lastPositionChange: Number(pair[2] ?? 0)
+            lastPositionChange: Number(pair[2] ?? 0),
+            points: Number(pair[3] ?? 0)
         };
     });
 
     // Ahora data[0] es el array de pilotos con formato-objeto
     const drivers = data[0];
+    const standingsOnly = drivers.length > 0 && drivers.every(d => d.standingsOnly);
 
     const datazone = document.querySelector(".teams-table-data");
     datazone.innerHTML = "";
@@ -1200,7 +1201,7 @@ export function new_load_teams_table(data) {
             teamName = teamName.slice(0, -5)
         }
         teamName = formatTeamNameForDisplay(teamName);
-        const result = new_addTeam(teamData[teamId], teamName, pos, teamId, lastPositionChange);
+        const result = new_addTeam(teamData[teamId], teamName, pos, teamId, lastPositionChange, standingsOnly ? teamInfo.points : null);
         const points = result.points;
         teamRows.push({ teamId, pos, points, row: result.row, posDiv: result.posDiv, pointsDiv: result.pointsDiv, pointsGapDiv: result.pointsGapDiv });
         if (pos === 1) {
@@ -1313,7 +1314,7 @@ function checkIfTeamIsChamp(team1Points, team2Points, pointsInfo, teamRows = [])
     }
 }
 
-function new_addTeam(teamRaceMap, name, pos, id, lastPositionChange = 0) {
+function new_addTeam(teamRaceMap, name, pos, id, lastPositionChange = 0, standingsPoints = null) {
     // teamRaceMap: Map<raceId, RaceObj[]>
     let data = document.querySelector(".teams-table-data");
     let row = document.createElement("div");
@@ -1654,6 +1655,10 @@ function new_addTeam(teamRaceMap, name, pos, id, lastPositionChange = 0) {
         }
     });
 
+    if (standingsPoints !== null && standingsPoints !== undefined) {
+        teampoints = Number(standingsPoints) || 0;
+    }
+
     const pointsGapDiv = document.createElement("div");
     pointsGapDiv.className = "standings-points-gap";
     row.appendChild(pointsGapDiv);
@@ -1925,6 +1930,11 @@ function new_addDriver(driver, races_done, odd) {
             row.appendChild(featureDiv);
         }
     });
+
+    // past F2/F3 seasons have no race results left, only the final standings
+    if (driver.standingsOnly) {
+        driverpoints = Number(driver.standingsPoints) || 0;
+    }
 
     const pointsGapDiv = document.createElement("div");
     pointsGapDiv.className = "standings-points-gap";

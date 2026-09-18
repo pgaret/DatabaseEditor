@@ -1186,6 +1186,10 @@ export function fetchSeasonResults(
         ORDER BY Position
       `, [formula, yearSelected], 'allRows') || [];
 
+  if (Number(formula) > 1 && !isCurrentYear && !hasF2F3RaceResults(yearSelected, formula)) {
+    return drivers.map(row => fetchF2F3StandingsOnlyResult(row[0], yearSelected, formula));
+  }
+
   const seasonResults = [];
   for (const row of drivers) {
     const driverID = row[0];
@@ -1201,6 +1205,70 @@ export function fetchSeasonResults(
 
 
   return resultsWithDoD;
+}
+
+// The game purges F2/F3 race-by-race results at season end and keeps only the
+// final standings, so past F2/F3 seasons can only be shown as a standings table.
+function hasF2F3RaceResults(year, formula) {
+  const count = queryDB(`
+    SELECT COUNT(*)
+    FROM Races_FeatureRaceResults
+    WHERE SeasonID = ?
+      AND RaceFormula = ?
+  `, [year, formula], 'singleValue');
+  return Number(count) > 0;
+}
+
+function fetchF2F3StandingsOnlyResult(driverID, year, formula) {
+  const standingsRow = queryDB(`
+    SELECT Position, Points
+    FROM Races_DriverStandings
+    WHERE RaceFormula = ?
+      AND SeasonID = ?
+      AND DriverID = ?
+  `, [formula, year, driverID], 'singleRow') || [0, 0];
+
+  // Race results are gone, so resolve the team from the junior-series contract active
+  // during that season (latest one if they moved). Finished contracts are in
+  // Staff_CareerHistory; ones still running are only in Staff_Contracts.
+  const teamID = queryDB(`
+    SELECT TeamID FROM (
+      SELECT ch.TeamID, ch.StartDay
+      FROM Staff_CareerHistory ch
+      JOIN Teams t ON t.TeamID = ch.TeamID
+      WHERE ch.StaffID = ?
+        AND t.Formula = ?
+        AND ch.StartDay <= (SELECT MAX(Day) FROM Races WHERE SeasonID = ?)
+        AND (ch.EndDay IS NULL OR ch.EndDay >= (SELECT MIN(Day) FROM Races WHERE SeasonID = ?))
+      UNION ALL
+      SELECT c.TeamID, c.StartDay
+      FROM Staff_Contracts c
+      JOIN Teams t ON t.TeamID = c.TeamID
+      WHERE c.StaffID = ?
+        AND t.Formula = ?
+        AND c.StartDay <= (SELECT MAX(Day) FROM Races WHERE SeasonID = ?)
+        AND c.EndSeason >= ?
+    )
+    ORDER BY StartDay DESC
+    LIMIT 1
+  `, [driverID, formula, year, year, driverID, formula, year, year], 'singleValue');
+
+  const driverNameRow = queryDB(`
+    SELECT FirstName, LastName
+    FROM Staff_BasicData
+    WHERE StaffID = ?
+  `, [driverID], 'singleRow');
+
+  return {
+    driverName: formatDriverName(driverNameRow),
+    latestTeamId: teamID ?? -1,
+    driverId: driverID,
+    championshipPosition: Number(standingsRow[0]) || 0,
+    lastPositionChange: 0,
+    standingsPoints: Number(standingsRow[1]) || 0,
+    standingsOnly: true,
+    races: []
+  };
 }
 
 export function fetchQualiResults(yearSelected) {
@@ -1364,7 +1432,7 @@ export function fetchDriversStandings(year, formula = 1) {
 
 export function fetchTeamsStandingsWithPositionChange(year, formula = 1) {
   return queryDB(`
-        SELECT TeamID, Position, LastPositionChange
+        SELECT TeamID, Position, LastPositionChange, Points
         FROM Races_TeamStandings
         WHERE SeasonID = ?
           AND RaceFormula = ?
