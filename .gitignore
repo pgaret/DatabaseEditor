@@ -28,3 +28,4 @@ scripts/
 # local modding tools (third-party binaries + game AES key)
 /tools/
 watcher/backups/
+watcher/watcher.log
