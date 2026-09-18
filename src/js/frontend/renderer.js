@@ -15,7 +15,7 @@ import {
     loadJuniorTeamDrivers,
     initFreeDriversElems
 } from './transfers';
-import { loadJuniorGrid, resetJuniorGrid } from './juniorGrid';
+import { loadJuniorGrid, resetJuniorGrid, refreshJuniorGridScores } from './juniorGrid';
 import { load_calendar } from './calendar';
   import {
       load_performance, load_performance_graph, load_attributes, manage_engineStats, load_cars, load_custom_engines,
@@ -311,6 +311,7 @@ function editModeHandler() {
     document.querySelector(".clicked").dataset.globalMentality = globalMentality
     let new_ovr = calculateOverall(stats, typeOverall);
     document.querySelector(".clicked").childNodes[1].childNodes[0].textContent = new_ovr
+    refreshJuniorGridScores()
 
     let retirement = document.querySelector(".actual-retirement").textContent
     let age = document.querySelector(".actual-age").textContent

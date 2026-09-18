@@ -169,7 +169,7 @@ export function place_drivers(driversArray) {
     document.querySelectorAll(".affiliates-and-arrows").forEach(updateAffiliateArrows)
 }
 
-function add_edit_container(div) {
+export function add_edit_container(div) {
     let edit_container = document.createElement("div")
     edit_container.className = "edit-container"
     let numbersicon = document.createElement("i")

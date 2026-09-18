@@ -8780,7 +8780,8 @@ body.og-theme .records-list {
 }
 
 
-.free-driver .edit-container {
+.free-driver .edit-container,
+.junior-card .edit-container {
   display: flex;
   gap: 5px;
   position: absolute;
@@ -8800,20 +8801,24 @@ body.og-theme .records-list {
   align-items: center;
 }
 
-.free-driver .bi-pencil-fill {
+.free-driver .bi-pencil-fill,
+.junior-card .bi-pencil-fill {
   font-size: 8px;
   height: 8PX;
 }
 
-.free-driver .bi-123 {
+.free-driver .bi-123,
+.junior-card .bi-123 {
   height: 17px;
 }
 
-.free-driver:hover .edit-container {
+.free-driver:hover .edit-container,
+.junior-card:hover .edit-container {
   opacity: 1;
 }
 
-.free-driver .edit-container:hover {
+.free-driver .edit-container:hover,
+.junior-card .edit-container:hover {
   background-color: var(--text-general);
   color: var(--negative-text);
 }
@@ -20831,4 +20836,14 @@ p.news-error-api-key {
 .junior-card-age {
   font-size: 12px;
   color: var(--dark-text);
+}
+
+.junior-card-ovr {
+  font-size: 13px;
+  min-width: 20px;
+  text-align: right;
+}
+
+.junior-card.dragging .edit-container {
+  opacity: 0;
 }

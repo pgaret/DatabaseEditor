@@ -1,6 +1,6 @@
 import interact from 'interactjs';
 import { combined_dict, team_dict, logos_disc } from "./config";
-import { format_name } from "./transfers";
+import { format_name, add_edit_container } from "./transfers";
 import { Command } from "../backend/command.js";
 
 /**
@@ -123,8 +123,28 @@ function buildDriverCard(driver) {
         age.title = "Age";
         meta.appendChild(age);
     }
+    const score = document.createElement("span");
+    score.className = "junior-card-ovr bold-font";
+    score.title = "Overall";
+    meta.appendChild(score);
     card.appendChild(meta);
+    setCardScore(card);
+
+    add_edit_container(card); // same "open in Attributes" shortcut as the F1 pills
     return card;
+}
+
+// The overall shown in the Attributes list, so both always agree (it is recalculated there on edits)
+function setCardScore(card) {
+    const ovr = document.querySelector(`.normal-driver[data-driverid="${card.dataset.driverid}"] .small-ovr span`)?.textContent;
+    const score = card.querySelector(".junior-card-ovr");
+    score.textContent = ovr ?? "";
+    score.classList.toggle("d-none", !ovr);
+}
+
+/** Called after a driver's stats are saved in the Attributes tab */
+export function refreshJuniorGridScores() {
+    juniorLayout.querySelectorAll(".junior-card").forEach(setCardScore);
 }
 
 function buildTeamCard(team) {
