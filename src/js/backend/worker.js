@@ -3,7 +3,7 @@ import {
   fetchTeamsStandingsWithPositionChange,
   fetchDrivers, fetchStaff, fetchEngines, fetchYear, fetchDriverNumbers, checkCustomTables, checkYearSave,
   fetchOneDriverSeasonResults, fetchOneTeamSeasonResults, fetchEventsDoneFrom, updateCustomEngines, fetchDriversPerYear, fetchDriverContracts,
-  fetchJuniorTeamDriverNames,
+  fetchJuniorTeamDriverNames, fetchJuniorGrid,
   editEngines, updateCustomConfig, fetchCustomConfig,
   fetch2025ModData, fetch2026ModData, check2025ModCompatibility,
   fetchPointsRegulations,
@@ -22,7 +22,7 @@ import { overwritePerformanceTeam, updateItemsForDesignDict, fitLoadoutsDict, ge
 import { setGlobals, getGlobals } from "./commandGlobals";
 import { editAge, editMarketability, editName, editRetirement, editSuperlicense, editCode, editMentality, editStats, setAllDriversStatsTo85 } from "./scriptUtils/eidtStatsUtils";
 import { editCalendar, fetchCalendar } from "./scriptUtils/calendarUtils";
-import { fireDriver, hireDriver, swapDrivers, editContract, futureContract, transferJuniorDriver, CONTRACT_PLACEHOLDERS_24 } from "./scriptUtils/transferUtils";
+import { fireDriver, hireDriver, swapDrivers, editContract, futureContract, transferJuniorDriver, releaseJuniorDriver, CONTRACT_PLACEHOLDERS_24 } from "./scriptUtils/transferUtils";
 import { change2024Standings, changeDriverLineUps, changeStats, removeFastestLap, timeTravelWithData, manageAffiliates, changeRaces, manageStandings, 
   insertStaff2025, manageFeederSeries, changeDriverEngineerPairs, updatePerofmrnace2025, fixes_mod,
   change2025Standings, 
@@ -46,6 +46,19 @@ import { fetchDriverPresetData, applyDriverStatOverrides } from "./scriptUtils/d
 
 import initSqlJs from 'sql.js';
 import { combined_dict } from "../frontend/config";
+
+// After an F2/F3 grid edit: redraw the grid and refresh the F1 transfers lists, which show junior seats too
+function postJuniorGridUpdate(formula, notiMsg, postMessage) {
+  postMessage({
+    responseMessage: "Junior grid fetched",
+    content: fetchJuniorGrid(formula),
+    noti_msg: notiMsg,
+    isEditCommand: true,
+    unlocksDownload: true
+  });
+  const yearData = checkYearSave();
+  postMessage({ responseMessage: "Drivers fetched", content: fetchDrivers(yearData[0]) });
+}
 
 // Diccionario de comandos
 const workerCommands = {
@@ -581,6 +594,26 @@ const workerCommands = {
 
     const drivers = fetchDrivers(yearData[0]);
     postMessage({ responseMessage: "Drivers fetched", content: drivers });
+  },
+  juniorGridRequest(data, postMessage) {
+    postMessage({ responseMessage: "Junior grid fetched", content: fetchJuniorGrid(data.formula) });
+  },
+  // Put a driver into an F2/F3 seat; whoever held that seat loses it
+  juniorGridAssign(data, postMessage) {
+    transferJuniorDriver(data.driverID, data.teamID, data.posInTeam, getGlobals().yearIteration);
+    postJuniorGridUpdate(data.formula, `Succesfully moved ${data.driver} to ${data.team}`, postMessage);
+  },
+  // Exchange the seats of two F2/F3 drivers (same or different team)
+  juniorGridSwap(data, postMessage) {
+    const { a, b } = data;
+    const yearIteration = getGlobals().yearIteration;
+    transferJuniorDriver(a.driverID, b.teamID, b.posInTeam, yearIteration);
+    transferJuniorDriver(b.driverID, a.teamID, a.posInTeam, yearIteration);
+    postJuniorGridUpdate(data.formula, `Succesfully swapped ${a.driver} and ${b.driver}`, postMessage);
+  },
+  juniorGridRelease(data, postMessage) {
+    releaseJuniorDriver(data.driverID);
+    postJuniorGridUpdate(data.formula, `Succesfully released ${data.driver} from ${data.team}`, postMessage);
   },
   autoContract: (data, postMessage) => {
     hireDriver("auto", data.driverID, data.teamID, data.position, getGlobals().yearIteration);

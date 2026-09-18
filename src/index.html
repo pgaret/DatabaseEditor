@@ -2103,6 +2103,19 @@
         <div class="transfer-top-panel">
           <div class="title-buttons-left">
             <div class="dropdown-global">
+              <button class="redesigned-dropdown bold-font" id="gridSeriesDropdown" aria-haspopup="true"
+                aria-expanded="false" data-value="1">
+                <span class="dropdown-label">F1</span>
+                <i class="redesigned-chevron"></i>
+              </button>
+              <ul class="redesigned-dropdown-menu" id="gridSeriesMenu" style="font-family: Formula1;"
+                data-bs-display="static">
+                <a class="redesigned-dropdown-item" data-value="1">F1</a>
+                <a class="redesigned-dropdown-item" data-value="2">F2</a>
+                <a class="redesigned-dropdown-item" data-value="3">F3</a>
+              </ul>
+            </div>
+            <div class="dropdown-global">
               <button class="redesigned-dropdown bold-font" id="staffTransfersDropdown" aria-haspopup="true"
                 aria-expanded="false" data-value="drivers">
                 <span class="dropdown-label">Drivers</span>
@@ -2455,6 +2468,21 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+        <div class="d-flex d-none" id="juniorGridLayout">
+          <div class="col-2">
+            <div class="main-columns-drag-section main-resizable" id="juniorPoolColumn">
+              <div class="search-and-order">
+                <div class="text-filter-container">
+                  <input class="text-filter" type="text" id="juniorPoolFilter" placeholder="Search...">
+                </div>
+              </div>
+              <div id="junior-pool"></div>
+            </div>
+          </div>
+          <div class="col-10">
+            <div class="main-resizable junior-teams-columns" id="juniorTeamsColumn"></div>
           </div>
         </div>
         <div class="lineups-view d-none" id="lineupsView">

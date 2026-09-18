@@ -20692,3 +20692,143 @@ p.news-error-api-key {
   font-weight: 600;
   background: color-mix(in srgb, #ffb648 10%, transparent);
 }
+
+/* ---- F2/F3 current grid (transfers) ---- */
+#junior-pool {
+  height: calc(100% - 55px);
+  overflow-y: auto;
+  margin-right: 4px;
+}
+
+.junior-pool-header {
+  font-size: 12px;
+  color: var(--dark-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 10px 10px 2px;
+}
+
+.junior-teams-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  margin-right: 14px;
+  padding-bottom: 4px;
+}
+
+.junior-team-card {
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.junior-team-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.junior-team-card.f2-card::after {
+  background-color: var(--f2-back);
+}
+
+.junior-team-card.f3-card::after {
+  background-color: var(--f3-back);
+}
+
+.junior-team-card-logo {
+  width: 44px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+}
+
+.junior-team-card-logo img {
+  max-width: 44px;
+  max-height: 36px;
+}
+
+.junior-seat {
+  min-width: 200px;
+  max-width: 200px;
+  min-height: 40px;
+  border-radius: 10px;
+  transition: background-color 0.15s;
+}
+
+.junior-seat.drop-hover,
+#juniorPoolColumn.drop-hover {
+  background-color: color-mix(in srgb, var(--new-primary) 18%, transparent);
+}
+
+.junior-seat-empty {
+  margin: 1px 3px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px dashed var(--dark-text);
+  color: var(--dark-text);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+.junior-card {
+  background-color: var(--elements);
+  border-radius: 9px;
+  padding: 5px 6px;
+  cursor: grab;
+  margin: 6px 5px;
+  color: var(--text-general);
+  transition: background-color 0.15s;
+  position: relative;
+  font-size: 15px;
+  overflow: hidden;
+  height: 36px;
+  display: flex;
+  gap: 3px;
+  box-shadow: var(--shadow-s);
+  align-items: center;
+  justify-content: space-between;
+  touch-action: none;
+}
+
+.junior-seat .junior-card {
+  margin: 1px 3px;
+}
+
+.junior-card:hover {
+  background-color: var(--table-hover);
+}
+
+.junior-card.dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+}
+
+.junior-card .name-container {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.junior-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.junior-card-age {
+  font-size: 12px;
+  color: var(--dark-text);
+}

@@ -208,19 +208,17 @@ export function checkAndFixContract(driverID, teamID) {
 }
 
 export function transferJuniorDriver(driverID,newTeamID, posInTeam, yearIteration = "24") {
-  const teamHasDriverInPosition = queryDB(`SELECT StaffID FROM Staff_Contracts WHERE TeamID = ? AND PosInTeam = ? AND ContractType = 0`,[newTeamID,posInTeam],"singleValue");
+  // Junior teams also contract race engineers and other staff at PosInTeam 1/2,
+  // so only a driver contract counts as occupying the seat.
+  const teamHasDriverInPosition = queryDB(`
+    SELECT con.StaffID FROM Staff_Contracts con
+    JOIN Staff_DriverData dri ON dri.StaffID = con.StaffID
+    WHERE con.TeamID = ? AND con.PosInTeam = ? AND con.ContractType = 0 AND con.StaffID != ?`,
+    [newTeamID,posInTeam,driverID],"singleValue");
   if (teamHasDriverInPosition) {
-    //remove that driver from the team
-    queryDB(`DELETE FROM Staff_Contracts WHERE StaffID = ? AND TeamID = ? AND ContractType = 0`,[teamHasDriverInPosition,newTeamID],'run');
-    queryDB(`UPDATE Staff_DriverData SET AssignedCarNumber = NULL WHERE StaffID = ?`,[teamHasDriverInPosition],'run');
-    queryDB(`UPDATE Staff_DriverData SET FeederSeriesAssignedCarNumber = NULL WHERE StaffID = ?`,[teamHasDriverInPosition],'run');
+    releaseJuniorDriver(teamHasDriverInPosition);
   }
-  //check if the driver has a contract with another team that is in between 11 and 31 (both included)
-  const hasJunioorContract = queryDB(`SELECT TeamID FROM Staff_Contracts WHERE StaffID = ? AND ContractType = 0 AND TeamID > 10 AND TeamID < 32`,[driverID],"singleValue");
-  if (hasJunioorContract) {
-    queryDB(`DELETE FROM Staff_Contracts WHERE StaffID = ? AND TeamID = ? AND ContractType = 0`,[driverID,hasJunioorContract],'run');
-    queryDB(`UPDATE Staff_DriverData SET FeederSeriesAssignedCarNumber = NULL WHERE StaffID = ?`,[driverID],'run');
-  }
+  releaseJuniorDriver(driverID);
   //add the driver to the new team
   const day = queryDB("SELECT Day FROM Player_State",[],"singleValue");
   const year = queryDB("SELECT CurrentSeason FROM Player_State",[],"singleValue");
@@ -248,7 +246,7 @@ export function transferJuniorDriver(driverID,newTeamID, posInTeam, yearIteratio
       [contractValues.staffID,contractValues.teamID,contractValues.posInTeam,contractValues.startDay,contractValues.endSeason,contractValues.salary,contractValues.startingBonus,contractValues.raceBonus,contractValues.raceBonusTargetPos],'run'
     );
   }
-  queryDB(`UPDATE Staff_DriverData SET AssignedCarNumber = ? WHERE StaffID = ?`,[contractValues.posInTeam,driverID],'run');
+  // The game only uses FeederSeriesAssignedCarNumber for junior seats; AssignedCarNumber is the F1 car
   queryDB(`UPDATE Staff_DriverData SET FeederSeriesAssignedCarNumber = ? WHERE StaffID = ?`,[contractValues.posInTeam,driverID],'run');
   rearrangeDriverEngineerPairings(contractValues.teamID);
   //if teamid is less than 22, then its 2, if more is 3
@@ -262,6 +260,17 @@ export function transferJuniorDriver(driverID,newTeamID, posInTeam, yearIteratio
     queryDB(`INSERT INTO Races_DriverStandings VALUES (?, ?, 0, ?, 0, 0, ?)`,[year,driverID,positionInStandings,juniorFormula],'run');
   }
 
+}
+
+/**
+ * Removes a driver's F2/F3 seat (any F1 contract they hold is left alone).
+ */
+export function releaseJuniorDriver(driverID) {
+  const juniorTeamID = queryDB(`SELECT TeamID FROM Staff_Contracts WHERE StaffID = ? AND ContractType = 0 AND TeamID BETWEEN 11 AND 31`,[driverID],"singleValue");
+  if (!juniorTeamID) return null;
+  queryDB(`DELETE FROM Staff_Contracts WHERE StaffID = ? AND ContractType = 0 AND TeamID BETWEEN 11 AND 31`,[driverID],'run');
+  queryDB(`UPDATE Staff_DriverData SET FeederSeriesAssignedCarNumber = NULL WHERE StaffID = ?`,[driverID],'run');
+  return juniorTeamID;
 }
 
 export function hireDriver(type,driverID,teamID,position,salary = "",startingBonus = "",raceBonus = "",raceBonusPos = "",yearEnd = "",yearIteration = "24") {

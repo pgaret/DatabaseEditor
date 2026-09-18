@@ -3186,6 +3186,78 @@ export function fetchJuniorTeamDriverNames(teamId) {
   return result;
 }
 
+/**
+ * Current F2 (formula 2) or F3 (formula 3) grid for the transfers view: every team with its
+ * car seats, plus the pool of drivers that could be put into one (anyone not retired, not in
+ * an F1 race seat and not already racing in this series).
+ */
+export function fetchJuniorGrid(formula) {
+  const isF2 = Number(formula) === 2;
+  const firstTeam = isF2 ? 11 : 22;
+  const lastTeam = isF2 ? 21 : 31;
+  const maxCars = isF2 ? 2 : 3;
+
+  const season = queryDB(`SELECT CurrentSeason FROM Player_State`, [], 'singleValue');
+
+  const rows = queryDB(`
+    SELECT
+      bas.StaffID, bas.FirstName, bas.LastName, bas.DOB,
+      (SELECT c.TeamID FROM Staff_Contracts c
+        WHERE c.StaffID = bas.StaffID AND c.ContractType = 0 AND (c.TeamID BETWEEN 1 AND 10 OR c.TeamID = 32)
+        ORDER BY c.PosInTeam LIMIT 1) AS F1TeamID,
+      (SELECT c.PosInTeam FROM Staff_Contracts c
+        WHERE c.StaffID = bas.StaffID AND c.ContractType = 0 AND (c.TeamID BETWEEN 1 AND 10 OR c.TeamID = 32)
+        ORDER BY c.PosInTeam LIMIT 1) AS F1Pos,
+      (SELECT c.TeamID FROM Staff_Contracts c
+        WHERE c.StaffID = bas.StaffID AND c.ContractType = 0 AND c.TeamID BETWEEN 11 AND 31
+        LIMIT 1) AS JuniorTeamID,
+      (SELECT c.PosInTeam FROM Staff_Contracts c
+        WHERE c.StaffID = bas.StaffID AND c.ContractType = 0 AND c.TeamID BETWEEN 11 AND 31
+        LIMIT 1) AS JuniorPos
+    FROM Staff_BasicData bas
+    JOIN Staff_DriverData dri ON dri.StaffID = bas.StaffID
+    JOIN Staff_GameData gam ON gam.StaffID = bas.StaffID
+    WHERE COALESCE(gam.Retired, 0) = 0
+      AND bas.FirstName != 'Placeholder'
+  `, [], 'allRows') || [];
+
+  const seatsByTeam = new Map();
+  for (let teamId = firstTeam; teamId <= lastTeam; teamId++) {
+    seatsByTeam.set(teamId, Array.from({ length: maxCars }, (_, i) => ({ pos: i + 1, driver: null })));
+  }
+
+  const pool = [];
+  rows.forEach(([staffID, firstName, lastName, dob, f1TeamId, f1Pos, juniorTeamId, juniorPos]) => {
+    const birthYear = dob ? new Date(Math.round((Number(dob) - 25569) * 86400 * 1000)).getUTCFullYear() : null;
+    const driver = {
+      driverId: staffID,
+      name: formatStaffNameFromLocKeys(firstName, lastName),
+      age: birthYear && season ? Number(season) - birthYear : null,
+      f1TeamId: f1TeamId ?? null,
+      f1Pos: f1Pos ?? null,
+      juniorTeamId: juniorTeamId ?? null
+    };
+
+    const seats = seatsByTeam.get(Number(juniorTeamId));
+    const seat = seats?.find(s => s.pos === Number(juniorPos));
+    if (seat && !seat.driver) {
+      seat.driver = driver;
+      return;
+    }
+    // F1 race drivers aren't candidates for a junior seat
+    if (f1TeamId && Number(f1Pos) <= 2) return;
+    pool.push(driver);
+  });
+
+  // Drivers from the other junior series first (the natural promotion/demotion pool),
+  // then F1 academy/reserve drivers, then free agents
+  const groupRank = (d) => (d.juniorTeamId ? 0 : (d.f1TeamId ? 1 : 2));
+  pool.sort((a, b) => groupRank(a) - groupRank(b) || a.name.localeCompare(b.name));
+
+  const teams = Array.from(seatsByTeam.entries()).map(([teamId, seats]) => ({ teamId, seats }));
+  return { formula: Number(formula), maxCars, teams, pool };
+}
+
 export function checkCustomTables(year) {
   let createdEnginesList = false;
   let createdEnginesStats = false;

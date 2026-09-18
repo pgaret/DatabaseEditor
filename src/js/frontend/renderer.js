@@ -15,6 +15,7 @@ import {
     loadJuniorTeamDrivers,
     initFreeDriversElems
 } from './transfers';
+import { loadJuniorGrid, resetJuniorGrid } from './juniorGrid';
 import { load_calendar } from './calendar';
   import {
       load_performance, load_performance_graph, load_attributes, manage_engineStats, load_cars, load_custom_engines,
@@ -686,12 +687,16 @@ var messageHandlers = {
         isSaveSelected = 1;
         viewerLoaded = false;
         downloadSaveButton.classList.remove("hidden");
+        resetJuniorGrid();
         remove_drivers();
         removeStatsDrivers();
         listenersStaffGroups();
         place_drivers(message);
         sortList("free-drivers");
         place_drivers_editStats(message);
+    },
+    "Junior grid fetched": (message) => {
+        loadJuniorGrid(message);
     },
     "Drivers fetched": (message) => {
         remove_drivers();
