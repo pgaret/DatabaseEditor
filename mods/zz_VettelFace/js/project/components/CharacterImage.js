@@ -163,8 +163,10 @@ define(["require", "exports", "common/core/DataStore", "common/lib/classnames", 
             this.setState({ bodyImage: (value ?? 'StaffPhotos/Bodies/MissingBody') });
         };
         onGotFace = (value) => {
+            // Unconditional: once flagged generated (so the 3D podium has a head),
+            // the engine hands these staff a generic pool face instead of none.
             const faceOverride = FACE_OVERRIDES[this.props.staffId];
-            if (faceOverride && (value == null || value == '' || value.includes('MissingFace'))) {
+            if (faceOverride) {
                 value = faceOverride;
             }
             this.setState({ faceImage: (value ?? 'StaffPhotos/Faces/MissingFace') });
