@@ -57,6 +57,14 @@ Further passes (all same-size, same route):
 - **Texture finishing:** remove the photo's broad shading from the upper face by swapping its low-frequency lightness for the donor albedo's. Extend the beard along the jawline with noise in the measured beard colour; tiling a copied patch visibly repeats, and mirroring whole rows smears the lips outward. Raise roughness (G16) and lower specular (G8) under a beard mask.
 - `tools/head-spike/install_head.py` does the whole patch → pack → read back → verify, and installs only if every check passes.
 
+### What in-game testing taught us (v11 → v12)
+
+- **Painted beards look like a hole.** Real bearded drivers use **hair cards in `SK_<Name>_Hair`**. Magnussen's are dense short cards over a light painted base, skinned to 41 bones including jaw, chin and lips; Alonso's stubble is paint only, and low-contrast. A dark photo beard on the skin, with no geometry, reads as a missing lower face.
+- **Every bespoke head has the same face rig:** 134 face joints and the same ~100 face poses in `PA_<Name>_FacePoses`, with no morph targets. A stiff-looking face comes from the edits, not a lesser rig. Baked photo shading doesn't move with expressions, and the warp had opened the eyelids 30%.
+- **The v12 approach, in the style of the game's own heads:** keep the donor's own skin texture (lighter tone, soft beard base, darker brows). Pin the eyelids and move the mouth rigidly in the warp. Re-place ~420 of the innermost head-hair cards as beard cards (`beard.py`).
+- **Beard rigging:** the donor hair section's bone map lacks the jaw, but its `r_jawTension` slot carries almost no weight. That slot is repointed to `def_c_jaw_joint`, and the beard cards are weighted jaw/head by height. The hair LOD's required-bones array already lists all 135 bones, so the jaw is evaluated.
+- **Skin weights** come right after the UVs: 2 strip bytes, `u32 variable(0), maxInfluences(4), numInfluences, numVerts, 16bitIndex(0)`, then `[u32 1, u32 N×8]` and `N × (4 × u8 bone-map slot, 4 × u8 weight)`.
+
 The source photo was the game's own profile image (`S_Vettel_TN`): frontal and neutral, with the right beard. Wikimedia Commons had only one usable bearded frontal photo.
 
 Caveats: `pack-raw` writes uncompressed (`pakchunk1_s3` goes from 632 MB to 1.5 GB), and Steam "Verify integrity of game files" reverts everything. A small standalone `_P` container would need a hand-written container header (chunk type 6) listing only the edited packages.
