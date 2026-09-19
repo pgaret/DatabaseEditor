@@ -9,6 +9,6 @@
     "affiliateSalaryCap": true,
     "mentalityGuardrails": true,
     "prospectDevelopment": true,
-    "vettelHead": true
+    "vettelHead": false
   }
 }
