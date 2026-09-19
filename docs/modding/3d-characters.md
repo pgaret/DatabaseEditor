@@ -49,6 +49,14 @@ Vettel took over de Vries's `FixedStaff` entry, so reshaping and retexturing de 
 4. **Texture**: bake the reshaped mesh into UV space, project the photo through the front camera, then mask it: face oval, cut at the brows, narrowed at the temples, extended over the beard, and faded on steep surfaces. Match colours in Lab: the photo's lightness level goes to the donor skin's, and the hue meets halfway. Re-encode BC1 with every mip (12, 5 of them in the bulk chunk), same size.
 5. **Splice** into the raw chunks and `pack-raw`. Read it back with `to-legacy` and render it before installing; that's how a red/blue channel swap was caught before it reached the game.
 
+Further passes (all same-size, same route):
+
+- **Material sections** tell you which triangles belong to which material: chain the `(BaseIndex, NumTriangles)` pairs that tile the index buffer; each is preceded by an int16 material index. The head's LOD0 has eye wetness, mouth interior, eyebrow and eyelash hair cards (`M_Eyelash`, shared `T_EyeBrow_Alpha`), eyeballs, and head skin. **Bake only the skin section:** the eyes and lash cards share UV tile 0 and would otherwise draw into the skin texture. Brow colour comes from the shared master material's defaults, so paint brows into the skin texture instead.
+- **Eyes:** recolour the driver's own iris texture, keeping its fibre detail, pupil and limbal ring.
+- **Hair** (`SK_<Name>_Hair`: strand cards plus a painted scalp layer; LOD2+ are low-detail shells) must get the same face warp, or the hairline floats or sinks. Cards are separate strips, and the atlas runs root→tip in v (the `_Root` texture confirms it), so each vertex's position along its strand is `(v − vmin)/(vmax − vmin)` per card. That's enough to lengthen, droop, bring a fringe forward, add volume and clearance from the scalp.
+- **Texture finishing:** remove the photo's broad shading from the upper face by swapping its low-frequency lightness for the donor albedo's. Extend the beard along the jawline with noise in the measured beard colour; tiling a copied patch visibly repeats, and mirroring whole rows smears the lips outward. Raise roughness (G16) and lower specular (G8) under a beard mask.
+- `tools/head-spike/install_head.py` does the whole patch → pack → read back → verify, and installs only if every check passes.
+
 The source photo was the game's own profile image (`S_Vettel_TN`): frontal and neutral, with the right beard. Wikimedia Commons had only one usable bearded frontal photo.
 
 Caveats: `pack-raw` writes uncompressed (`pakchunk1_s3` goes from 632 MB to 1.5 GB), and Steam "Verify integrity of game files" reverts everything. A small standalone `_P` container would need a hand-written container header (chunk type 6) listing only the edited packages.
